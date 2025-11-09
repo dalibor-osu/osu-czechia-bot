@@ -1,0 +1,54 @@
+﻿# Docker compose file for local development
+services:
+  database-postgresql:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./PostgreSQL/Init.Development.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - services
+    
+  osu-czechia-bot:
+    image: osu-czechia-bot
+    build:
+      context: .
+      dockerfile: OsuCzechiaBot/Dockerfile
+      args:
+        CONFIGURATION: Development
+    environment:
+      - Discord__Token=your token
+      - Discord__GuildId=123
+      - Discord__AuthChannelId=123
+      - Discord__LogChannelId=123
+      - Discord__AuthorizedRoleId=123
+      - Discord__OneDigitRoleId=123
+      - Discord__TwoDigitRoleId=123
+      - Discord__ThreeDigitRoleId=123
+      - Discord__FourDigitRoleId=123
+      - Discord__FiveDigitRoleId=123
+      - Discord__SixDigitRoleId=123
+      - Discord__SevenDigitRoleId=123
+      - Discord__EightDigitRoleId=123
+      - Discord__NineDigitRoleId=123
+      - Discord__TenDigitRoleId=123
+      
+      - Osu__ClientId=123
+      - Osu__ClientSecret=your secret
+      
+      - ConnectionStrings__PostgreSQL=Host=localhost;Database=osu_czechia;Username=osu_czechia_bot;Password=9BsmTF0UUHb1v4xSWcdoMRPsy3TqDj
+    depends_on:
+      - database-postgresql
+    networks:
+      - services
+
+networks:
+  services:
+
+volumes:
+  postgres:
