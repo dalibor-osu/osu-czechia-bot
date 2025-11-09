@@ -2,7 +2,6 @@ using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 using OsuCzechiaBot.Configuration;
-using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Managers;
 
 namespace OsuCzechiaBot.Modules;
