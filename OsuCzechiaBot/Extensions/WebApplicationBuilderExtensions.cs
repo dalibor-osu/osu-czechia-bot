@@ -13,6 +13,7 @@ using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Exceptions;
 using OsuCzechiaBot.Managers;
 using Serilog;
+using Serilog.Events;
 
 namespace OsuCzechiaBot.Extensions;
 
@@ -27,7 +28,16 @@ public static class WebApplicationBuilderExtensions
         builder.ConfigureDatabase();
 
         builder.Services.AddMvc();
-        builder.Services.AddSerilog(options => { options.WriteTo.Console(); });
+        builder.Services.AddSerilog(config =>
+        {
+            config
+                .ReadFrom.Configuration(builder.Configuration)
+                .WriteTo.Console()
+                #if !DEBUG
+                .WriteTo.File(path: "/app/logs/log-.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7, restrictedToMinimumLevel: LogEventLevel.Warning)
+                #endif
+                .Enrich.FromLogContext();
+        });
 
         builder.Services.AddSingleton(new RestClient(new BotToken(configurationAccessor.Discord.Token)));
         builder.Services.AddHttpClient<OsuHttpClient>(options =>
@@ -45,10 +55,7 @@ public static class WebApplicationBuilderExtensions
     private static WebApplicationBuilder ConfigureDiscord(this WebApplicationBuilder builder)
     {
         builder.Services
-            .AddDiscordGateway(options =>
-            {
-                options.Intents = GatewayIntents.All;
-            })
+            .AddDiscordGateway(options => { options.Intents = GatewayIntents.All; })
             .AddApplicationCommands()
             .AddDiscordRest()
             .AddGatewayHandlers(typeof(Program).Assembly);
