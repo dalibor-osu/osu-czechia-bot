@@ -25,17 +25,18 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
     public async Task UnlinkAsync()
     {
         ulong discordId = Context.User.Id;
+        await RespondAsync(InteractionCallback.DeferredMessage(MessageFlags.Ephemeral));
         bool success = await userManager.UnlinkUserAsync(discordId, Context.Interaction, CancellationToken.None);
         if (!success)
         {
             return;
         }
 
-        await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
+        await Context.Interaction.SendFollowupMessageAsync(new InteractionMessageProperties
         {
             Content = "Your osu! profile has been unlinked. You will have to authorize again using the */authorize* command.",
             Flags = MessageFlags.Ephemeral
-        }));
+        });
     }
 
     private string GetAuthUrl(ulong userId)

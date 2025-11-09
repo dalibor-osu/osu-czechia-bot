@@ -17,5 +17,5 @@ public class OsuUserExtendedWithOptionalData : OsuUserExtended
     public Kudosu Kudosu { get; set; } = null!;
     
     [JsonPropertyName("statistics_rulesets")]
-    public RulesetsStatistics RulesetsStatistics { get; set; } = null!;
+    public RulesetsStatistics? RulesetsStatistics { get; set; } = null!;
 }

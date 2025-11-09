@@ -51,11 +51,11 @@ public class UserManager(
         {
             if (interaction is not null)
             {
-                await interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
+                await interaction.SendFollowupMessageAsync(new InteractionMessageProperties
                 {
                     Content = "Couldn't unlink your osu! profile, because you are not authorized yet. Please use the */authorize* command.",
                     Flags = MessageFlags.Ephemeral
-                }), cancellationToken: cancellationToken);
+                }, cancellationToken: cancellationToken);
             }
 
             return false;
