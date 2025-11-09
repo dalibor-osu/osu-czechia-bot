@@ -17,6 +17,23 @@ public class UserManager(
     AuthorizedUserDatabaseService dbService)
 {
     public async Task<AuthorizedUser?> GetAsync(ulong discordId) => await dbService.GetByDiscordIdAsync(discordId);
+
+    public async Task MessageUserAsync(ulong discordId, string message, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var guildUser = await restClient.GetGuildUserAsync(configurationAccessor.Discord.GuildId, discordId, cancellationToken: cancellationToken);
+            var dmChannel = await guildUser.GetDMChannelAsync(cancellationToken: cancellationToken);
+            await dmChannel.SendMessageAsync(new MessageProperties
+            {
+                Content = message
+            }, cancellationToken: cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Something went wrong when DMing user: {UserId}", discordId);
+        }
+    }
     
     public async Task UpdateUserRoles(AuthorizedUser user, OsuUserExtendedWithOptionalData? userData = null,
         CancellationToken cancellationToken = default)
@@ -78,11 +95,7 @@ public class UserManager(
             return;
         }
 
-        var dmChannel = await guildUser.GetDMChannelAsync(cancellationToken: cancellationToken);
-        await dmChannel.SendMessageAsync(new MessageProperties
-        {
-            Content = $"You've been timed out on osu! Czechia server. Reason: {reason}"
-        }, cancellationToken: cancellationToken);
+        await MessageUserAsync(discordId, reason, cancellationToken);
     }
 
     private async Task RemoveAllUserRankRoles(AuthorizedUser user, CancellationToken cancellationToken = default)

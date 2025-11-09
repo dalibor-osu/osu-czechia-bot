@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NetCord.Hosting.Services;
+using OsuCzechiaBot.Constants;
 using OsuCzechiaBot.Database;
 using OsuCzechiaBot.Extensions;
 using OsuCzechiaBot.Managers;
@@ -20,17 +21,32 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapGet("/authorize", async (
+    HttpContext httpContext,
     [FromQuery(Name = "state")] ulong discordId,
     [FromQuery] string code,
     [FromServices] AuthManager authManager,
-    CancellationToken cancellationToken) =>
+    [FromServices] UserManager userManager) =>
 {
     if (discordId < 1)
     {
         return Results.BadRequest();
     }
 
-    return await authManager.AuthorizeUserAsync(discordId, code, cancellationToken);
+    httpContext.Response.ContentType = MediaTypes.Html;
+    await httpContext.Response.WriteAsync(HtmlResponses.AuthBeingProcessed);
+    await httpContext.Response.Body.FlushAsync();
+
+    try
+    {
+        string responseMessage = await authManager.AuthorizeUserAsync(discordId, code);
+        await httpContext.Response.WriteAsync(responseMessage);
+    }
+    catch
+    {
+        await httpContext.Response.WriteAsync(HtmlResponses.AuthFailed);
+    }
+    
+    return Results.Empty;
 });
 
 app.AddModules(typeof(Program).Assembly);

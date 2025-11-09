@@ -16,18 +16,18 @@ public class AuthManager(
     UserManager userManager,
     ConfigurationAccessor configurationAccessor)
 {
-    public async Task<IResult> AuthorizeUserAsync(ulong discordId, string code, CancellationToken cancellationToken = default)
+    public async Task<string> AuthorizeUserAsync(ulong discordId, string code, CancellationToken cancellationToken = default)
     {
         var existingUser = await authorizedUserDatabaseService.GetByDiscordIdAsync(discordId);
         if (existingUser != null)
         {
-            return Results.Content(HtmlResponses.AuthAlreadyAuthorized, MediaTypes.Html);
+            return HtmlResponses.AuthAlreadyAuthorized;
         }
 
         var tokenResponse = await osuHttpClient.GetTokenFromCode(code);
         if (tokenResponse == null)
         {
-            return Results.Content(HtmlResponses.AuthSomethingWentWrong, MediaTypes.Html);
+            return HtmlResponses.AuthFailed;
         }
 
         var authorizedUser = new AuthorizedUser
@@ -41,7 +41,7 @@ public class AuthManager(
         var osuUserData = await osuHttpClient.GetUserData(authorizedUser);
         if (osuUserData == null || osuUserData.Id < 1)
         {
-            return Results.Content(HtmlResponses.AuthSomethingWentWrong, MediaTypes.Html);
+            return HtmlResponses.AuthFailed;
         }
 
         authorizedUser.OsuId = osuUserData.Id;
@@ -64,6 +64,6 @@ public class AuthManager(
             $"Successfully authorized <@{discordId}> with {authorizedUser.GetMarkdownOsuProfileLink()}!",
             cancellationToken: cancellationToken);
 
-        return Results.Content(HtmlResponses.AuthSuccess, MediaTypes.Html);
+        return HtmlResponses.AuthSuccess;
     }
 }
