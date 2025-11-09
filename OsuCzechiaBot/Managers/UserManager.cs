@@ -98,6 +98,48 @@ public class UserManager(
         await MessageUserAsync(discordId, reason, cancellationToken);
     }
 
+    public async Task<bool> RefreshTokenAsync(ulong discordId, CancellationToken cancellationToken = default)
+    {
+        var user = await dbService.GetByDiscordIdAsync(discordId);
+        if (user == null)
+        {
+            logger.LogError("Failed to get user data: {UserId}", discordId);
+            return false;
+        }
+
+        TokenResponse? tokenResponse;
+        try
+        {
+            tokenResponse = await osuHttpClient.GetTokenFromRefreshToken(user.RefreshToken);
+        }
+        catch (Exception e)
+        {
+            user.Authorized = false;
+            logger.LogError(e, "Failed to get new tokens for user: {UserId}", discordId);
+            return false;
+        }
+
+        if (tokenResponse is null)
+        {
+            logger.LogError("Failed to get new tokens for user: {UserId}", discordId);
+            return false;
+        }
+        
+        user.RefreshToken = tokenResponse.RefreshToken;
+        user.AccessToken = tokenResponse.AccessToken;
+        user.Expires = DateTimeOffset.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
+        user.Authorized = true;
+        
+        var result = await dbService.UpdateAsync(user);
+        if (result is null)
+        {
+            logger.LogError("Failed to update user data: {UserId}", discordId);
+            return false;
+        }
+
+        return true;
+    }
+
     private async Task RemoveAllUserRankRoles(AuthorizedUser user, CancellationToken cancellationToken = default)
     {
         var guildUser =

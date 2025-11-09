@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using Newtonsoft.Json;
 using OsuCzechiaBot.Configuration;
 using OsuCzechiaBot.Models;
 using OsuCzechiaBot.Models.OsuApi;
@@ -9,7 +10,6 @@ public class OsuHttpClient(HttpClient httpClient, ILogger<OsuHttpClient> logger,
 {
     public async Task<TokenResponse?> GetTokenFromCode(string code)
     {
-        const string url = "oauth/token";
         var request = new TokenFromCodeRequest
         {
             ClientId = configurationAccessor.Osu.ClientId,
@@ -17,10 +17,27 @@ public class OsuHttpClient(HttpClient httpClient, ILogger<OsuHttpClient> logger,
             Code = code,
         };
 
+        return await GetTokenAsync(JsonContent.Create(request));
+    }
+
+    public async Task<TokenResponse?> GetTokenFromRefreshToken(string refreshToken)
+    {
+        var request = new TokenFromRefreshTokenRequest
+        {
+            ClientId = configurationAccessor.Osu.ClientId,
+            ClientSecret = configurationAccessor.Osu.ClientSecret,
+            RefreshToken = refreshToken,
+        };
+
+        return await GetTokenAsync(JsonContent.Create(request));
+    }
+
+    private async Task<TokenResponse?> GetTokenAsync(JsonContent content) {
+        const string url = "oauth/token";
         HttpResponseMessage response;
         try
         {
-            response = await httpClient.PostAsync(url, JsonContent.Create(request));
+            response = await httpClient.PostAsync(url, content);
         }
         catch (Exception e)
         {
@@ -30,7 +47,8 @@ public class OsuHttpClient(HttpClient httpClient, ILogger<OsuHttpClient> logger,
 
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to get token from osu.ppy. Status code: {StatusCode}, Body: {Body}", response.StatusCode, await response.Content.ReadAsStreamAsync());
+            string body = await response.Content.ReadAsStringAsync();
+            logger.LogError("Failed to get token from osu.ppy. Status code: {StatusCode}, Body: {Body}", response.StatusCode, body);
             return null;
         }
 
@@ -67,11 +85,12 @@ public class OsuHttpClient(HttpClient httpClient, ILogger<OsuHttpClient> logger,
 
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to get user info from osu.ppy. Status code: {StatusCode}, Body: {Body}", response.StatusCode, await response.Content.ReadAsStreamAsync());
+            logger.LogError("Failed to get user info from osu.ppy. Status code: {StatusCode}, Body: {Body}", response.StatusCode,
+                await response.Content.ReadAsStreamAsync());
             return null;
         }
-        
-        
+
+
         try
         {
             return await response.Content.ReadFromJsonAsync<OsuUserExtendedWithOptionalData>();

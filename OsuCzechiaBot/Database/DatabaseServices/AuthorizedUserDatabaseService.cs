@@ -5,6 +5,12 @@ namespace OsuCzechiaBot.Database.DatabaseServices;
 
 public class AuthorizedUserDatabaseService(OsuCzechiaBotDatabaseContext dbContext)
 {
+    public async Task<IReadOnlyCollection<ulong>> ListExpiringIdsAsync()
+    {
+        var threshold = DateTimeOffset.UtcNow.AddHours(1);
+        return await dbContext.AuthorizedUsers.Where(u => u.Expires <= threshold && u.Authorized).Select(u => u.DiscordId).ToListAsync();
+    }
+
     public async Task<AuthorizedUser> AddAsync(AuthorizedUser user)
     {
         dbContext.AuthorizedUsers.Add(user);
@@ -22,7 +28,7 @@ public class AuthorizedUserDatabaseService(OsuCzechiaBotDatabaseContext dbContex
         {
             dbContext.AuthorizedUsers.Update(user);
         }
-        
+
         await dbContext.SaveChangesAsync();
         return user;
     }
@@ -44,10 +50,29 @@ public class AuthorizedUserDatabaseService(OsuCzechiaBotDatabaseContext dbContex
         {
             return null;
         }
-        
+
         user.OsuId = osuId;
         await dbContext.SaveChangesAsync();
         return user;
+    }
+
+    public async Task<AuthorizedUser?> UpdateAsync(AuthorizedUser user)
+    {
+        var existingUser = await dbContext.AuthorizedUsers.FirstOrDefaultAsync(u => u.DiscordId == user.DiscordId);
+        if (existingUser is null)
+        {
+            return null;
+        }
+        
+        existingUser.RefreshToken = user.RefreshToken;
+        existingUser.AccessToken = user.AccessToken;
+        existingUser.Expires = user.Expires;
+        existingUser.Authorized = user.Authorized;
+        existingUser.CountryCode = user.CountryCode;
+        existingUser.OsuId = user.OsuId;
+        
+        await dbContext.SaveChangesAsync();
+        return existingUser;
     }
 
     public async Task<AuthorizedUser?> RemoveAsync(ulong discordId)
@@ -57,6 +82,7 @@ public class AuthorizedUserDatabaseService(OsuCzechiaBotDatabaseContext dbContex
         {
             return null;
         }
+
         dbContext.AuthorizedUsers.Remove(user);
         await dbContext.SaveChangesAsync();
         return user;

@@ -19,9 +19,11 @@ public class AuthorizedUser
     public string RefreshToken { get; set; } = string.Empty;
     
     [Required]
-    public DateTimeOffset Expires { get; set; }
+    public DateTimeOffset? Expires { get; set; }
     
     [Required]
     [MaxLength(3)]
     public string CountryCode { get; set; } = string.Empty;
+
+    public bool Authorized { get; set; } = true;
 }

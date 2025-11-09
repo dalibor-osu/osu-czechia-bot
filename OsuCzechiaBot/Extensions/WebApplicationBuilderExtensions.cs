@@ -11,6 +11,7 @@ using OsuCzechiaBot.Configuration;
 using OsuCzechiaBot.Database;
 using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Exceptions;
+using OsuCzechiaBot.Jobs;
 using OsuCzechiaBot.Managers;
 using Serilog;
 using Serilog.Events;
@@ -48,6 +49,8 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddScoped<UserManager>();
         builder.Services.AddScoped<AuthManager>();
+
+        builder.Services.AddHostedService<TokenRefreshJob>();
 
         return builder;
     }
