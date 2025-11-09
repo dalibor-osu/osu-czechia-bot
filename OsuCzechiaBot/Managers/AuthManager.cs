@@ -3,6 +3,7 @@ using OsuCzechiaBot.Clients;
 using OsuCzechiaBot.Configuration;
 using OsuCzechiaBot.Constants;
 using OsuCzechiaBot.Database.DatabaseServices;
+using OsuCzechiaBot.Extensions;
 using OsuCzechiaBot.Models;
 
 namespace OsuCzechiaBot.Managers;
@@ -38,7 +39,7 @@ public class AuthManager(
         };
 
         var osuUserData = await osuHttpClient.GetUserData(authorizedUser);
-        if (osuUserData == null)
+        if (osuUserData == null || osuUserData.Id < 1)
         {
             return Results.Content(HtmlResponses.AuthSomethingWentWrong, MediaTypes.Html);
         }
@@ -60,7 +61,7 @@ public class AuthManager(
 
         await authorizedUserDatabaseService.AddOrUpdateAsync(authorizedUser);
         await restClient.SendMessageAsync(configurationAccessor.Discord.LogChannelId,
-            $"Successfully authorized <@{discordId}> with [osu profile](https://osu.ppy.sh/users/{authorizedUser.OsuId})!",
+            $"Successfully authorized <@{discordId}> with {authorizedUser.GetMarkdownOsuProfileLink()}!",
             cancellationToken: cancellationToken);
 
         return Results.Content(HtmlResponses.AuthSuccess, MediaTypes.Html);

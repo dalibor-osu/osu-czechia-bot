@@ -27,11 +27,6 @@ public class AuthorizedUserDatabaseService(OsuCzechiaBotDatabaseContext dbContex
         return user;
     }
 
-    public async Task<AuthorizedUser?> GetAsync(Guid id)
-    {
-        return await dbContext.AuthorizedUsers.FindAsync(id);
-    }
-
     public async Task<AuthorizedUser?> GetByDiscordIdAsync(ulong discordId)
     {
         return await dbContext.AuthorizedUsers.FirstOrDefaultAsync(u => u.DiscordId == discordId);

@@ -2,6 +2,7 @@ using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 using OsuCzechiaBot.Configuration;
+using OsuCzechiaBot.Extensions;
 using OsuCzechiaBot.Managers;
 
 namespace OsuCzechiaBot.Modules;
@@ -13,6 +14,17 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
     public async Task Authorize()
     {
         ulong userId = Context.User.Id;
+        var authorizedUser = await userManager.GetAsync(userId);
+
+        if (authorizedUser is { OsuId: > 0 })
+        {
+            await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
+            {
+                Content = $"You are already authorized with this {authorizedUser.GetMarkdownOsuProfileLink()}. If you'd like to link a different account, use the */unlink* command first.",
+                Flags = MessageFlags.Ephemeral
+            }));
+            return;
+        }
         await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
         {
             Content = $"Please authorize via this link: {GetAuthUrl(userId)}",

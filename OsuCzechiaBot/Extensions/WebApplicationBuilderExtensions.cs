@@ -13,7 +13,6 @@ using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Exceptions;
 using OsuCzechiaBot.Managers;
 using Serilog;
-using Serilog.Events;
 
 namespace OsuCzechiaBot.Extensions;
 
