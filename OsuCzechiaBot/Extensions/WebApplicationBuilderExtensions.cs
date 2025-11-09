@@ -13,6 +13,7 @@ using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Exceptions;
 using OsuCzechiaBot.Managers;
 using Serilog;
+using Serilog.Events;
 
 namespace OsuCzechiaBot.Extensions;
 
@@ -32,7 +33,7 @@ public static class WebApplicationBuilderExtensions
             config
                 .ReadFrom.Configuration(builder.Configuration)
                 .WriteTo.Console()
-                #if !DEBUG
+                #if RELEASE
                 .WriteTo.File(path: "/app/logs/log-.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7, restrictedToMinimumLevel: LogEventLevel.Warning)
                 #endif
                 .Enrich.FromLogContext();

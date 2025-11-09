@@ -7,6 +7,7 @@ public static class HtmlResponses
                                              {Head}
                                                  <body>
                                                      <p>You are being authorized. You will be pinged on the server once the authorization is done.</p>
+                                                     <p>This page should close automatically when authorization is done.</p>
                                              """;
 
     public const string AuthDone = """
