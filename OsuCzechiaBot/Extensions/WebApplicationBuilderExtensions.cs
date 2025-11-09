@@ -8,13 +8,13 @@ using NetCord.Hosting.Services.ApplicationCommands;
 using NetCord.Rest;
 using OsuCzechiaBot.Clients;
 using OsuCzechiaBot.Configuration;
+using OsuCzechiaBot.Constants;
 using OsuCzechiaBot.Database;
 using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Exceptions;
 using OsuCzechiaBot.Jobs;
 using OsuCzechiaBot.Managers;
 using Serilog;
-using Serilog.Events;
 
 namespace OsuCzechiaBot.Extensions;
 
@@ -44,7 +44,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddHttpClient<OsuHttpClient>(options =>
         {
             options.BaseAddress = new Uri("https://osu.ppy.sh");
-            options.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            options.DefaultRequestHeaders.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(MediaTypes.Json));
         });
 
         builder.Services.AddScoped<UserManager>();

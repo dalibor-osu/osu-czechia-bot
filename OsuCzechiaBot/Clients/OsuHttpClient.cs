@@ -1,5 +1,4 @@
 using System.Net.Http.Headers;
-using Newtonsoft.Json;
 using OsuCzechiaBot.Configuration;
 using OsuCzechiaBot.Models;
 using OsuCzechiaBot.Models.OsuApi;
@@ -89,7 +88,6 @@ public class OsuHttpClient(HttpClient httpClient, ILogger<OsuHttpClient> logger,
                 await response.Content.ReadAsStreamAsync());
             return null;
         }
-
 
         try
         {
