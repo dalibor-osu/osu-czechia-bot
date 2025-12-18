@@ -3,62 +3,27 @@ using OsuCzechiaBot.Models;
 
 namespace OsuCzechiaBot.Database.DatabaseServices;
 
-public class AuthorizedUserDatabaseService(OsuCzechiaBotDatabaseContext dbContext)
+public class AuthorizedUserDatabaseService(OsuCzechiaBotDatabaseContext dbContext) : DatabaseServiceBase<AuthorizedUser, ulong>(dbContext, dbContext.AuthorizedUsers)
 {
     public async Task<IReadOnlyCollection<ulong>> ListExpiringIdsAsync()
     {
         var threshold = DateTimeOffset.UtcNow.AddHours(1);
-        return await dbContext.AuthorizedUsers.Where(u => u.Expires <= threshold && u.Authorized).Select(u => u.DiscordId).ToListAsync();
-    }
-
-    public async Task<AuthorizedUser> AddAsync(AuthorizedUser user)
-    {
-        dbContext.AuthorizedUsers.Add(user);
-        await dbContext.SaveChangesAsync();
-        return user;
-    }
-
-    public async Task<AuthorizedUser> AddOrUpdateAsync(AuthorizedUser user)
-    {
-        if (!await dbContext.AuthorizedUsers.AnyAsync(u => u.DiscordId == user.DiscordId))
-        {
-            dbContext.AuthorizedUsers.Add(user);
-        }
-        else
-        {
-            dbContext.AuthorizedUsers.Update(user);
-        }
-
-        await dbContext.SaveChangesAsync();
-        return user;
+        return await DbSet.Where(u => u.Expires <= threshold && u.Authorized).Select(u => u.Id).ToListAsync();
     }
 
     public async Task<AuthorizedUser?> GetByDiscordIdAsync(ulong discordId)
     {
-        return await dbContext.AuthorizedUsers.FirstOrDefaultAsync(u => u.DiscordId == discordId);
+        return await GetByAsync(u => u.Id == discordId);
     }
 
     public async Task<AuthorizedUser?> GetByOsuId(int osuId)
     {
-        return await dbContext.AuthorizedUsers.FirstOrDefaultAsync(u => u.OsuId == osuId);
+        return await GetByAsync(u => u.OsuId == osuId);
     }
 
-    public async Task<AuthorizedUser?> UpdateOsuIdAsync(ulong discordId, int osuId)
+    public override async Task<AuthorizedUser?> UpdateAsync(AuthorizedUser user)
     {
-        var user = await dbContext.AuthorizedUsers.FirstOrDefaultAsync(u => u.DiscordId == discordId);
-        if (user == null)
-        {
-            return null;
-        }
-
-        user.OsuId = osuId;
-        await dbContext.SaveChangesAsync();
-        return user;
-    }
-
-    public async Task<AuthorizedUser?> UpdateAsync(AuthorizedUser user)
-    {
-        var existingUser = await dbContext.AuthorizedUsers.FirstOrDefaultAsync(u => u.DiscordId == user.DiscordId);
+        var existingUser = await DbSet.FirstOrDefaultAsync(u => u.Id == user.Id);
         if (existingUser is null)
         {
             return null;
@@ -71,20 +36,7 @@ public class AuthorizedUserDatabaseService(OsuCzechiaBotDatabaseContext dbContex
         existingUser.CountryCode = user.CountryCode;
         existingUser.OsuId = user.OsuId;
         
-        await dbContext.SaveChangesAsync();
+        await Context.SaveChangesAsync();
         return existingUser;
-    }
-
-    public async Task<AuthorizedUser?> RemoveAsync(ulong discordId)
-    {
-        var user = await dbContext.AuthorizedUsers.FirstOrDefaultAsync(u => u.DiscordId == discordId);
-        if (user == null)
-        {
-            return null;
-        }
-
-        dbContext.AuthorizedUsers.Remove(user);
-        await dbContext.SaveChangesAsync();
-        return user;
     }
 }

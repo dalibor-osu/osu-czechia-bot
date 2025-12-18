@@ -32,7 +32,7 @@ public class AuthManager(
 
         var authorizedUser = new AuthorizedUser
         {
-            DiscordId = discordId,
+            Id = discordId,
             AccessToken = tokenResponse.AccessToken,
             RefreshToken = tokenResponse.RefreshToken,
             Expires = DateTimeOffset.UtcNow.AddSeconds(tokenResponse.ExpiresIn),
@@ -47,12 +47,32 @@ public class AuthManager(
         authorizedUser.OsuId = osuUserData.Id;
         authorizedUser.CountryCode = osuUserData.CountryCode;
 
-        await userManager.UpdateUserRoles(authorizedUser, osuUserData, cancellationToken);
+        await userManager.UpdateUserRoles(authorizedUser, true, osuUserData, cancellationToken);
 
         try
         {
             var user = await restClient.GetGuildUserAsync(configurationAccessor.Discord.GuildId, discordId, cancellationToken: cancellationToken);
-            await user.ModifyAsync(u => u.WithNickname(osuUserData.Username), cancellationToken: cancellationToken);
+            if (!string.IsNullOrWhiteSpace(user.Nickname))
+            {
+                if (!osuUserData.Username.Equals(user.Nickname, StringComparison.OrdinalIgnoreCase))
+                {
+                    await user.ModifyAsync(guidUser => guidUser.WithNickname($"{user.Nickname} ({osuUserData.Username})"), cancellationToken: cancellationToken);
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(user.GlobalName))
+            {
+                if (!osuUserData.Username.Equals(user.GlobalName, StringComparison.OrdinalIgnoreCase))
+                {
+                    await user.ModifyAsync(guidUser => guidUser.WithNickname($"{user.GlobalName} ({osuUserData.Username})"), cancellationToken: cancellationToken);
+                }
+            }
+            else
+            {
+                if (!osuUserData.Username.Equals(user.Username, StringComparison.OrdinalIgnoreCase))
+                {
+                    await user.ModifyAsync(guidUser => guidUser.WithNickname($"{user.Username} ({osuUserData.Username})"), cancellationToken: cancellationToken);
+                }
+            }
         }
         catch (Exception e)
         {

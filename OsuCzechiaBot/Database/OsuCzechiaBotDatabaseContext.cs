@@ -8,6 +8,7 @@ public class OsuCzechiaBotDatabaseContext(DbContextOptions<OsuCzechiaBotDatabase
     public const string SchemaName = "osu_czechia";
     
     public DbSet<AuthorizedUser> AuthorizedUsers { get; set; }
+    public DbSet<OneTimeJobLog> OneTimeJobLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

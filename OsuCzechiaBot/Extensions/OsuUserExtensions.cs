@@ -20,6 +20,11 @@ public static class OsuUserExtensions
         }) ?? 0;
     }
 
+    public static ulong GetMainCountryGlobalRank(this OsuUserExtendedWithOptionalData userData)
+    {
+        return userData.MainRulesetStatistics?.CountryRank ?? 0;
+    }
+
     public static OsuRuleset GetMainRuleset(this OsuUserExtendedWithOptionalData userData) =>
         EnumHelper.ParseOrDefault(userData.Playmode, OsuRuleset.Osu);
 }

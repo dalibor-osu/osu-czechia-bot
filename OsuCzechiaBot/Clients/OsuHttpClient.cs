@@ -73,7 +73,7 @@ public class OsuHttpClient(HttpClient httpClient, ILogger<OsuHttpClient> logger,
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to get user info from osu.ppy for DiscordUserId: {DiscordId}, OsuUserId: {OsuUserId}", user.DiscordId,
+            logger.LogError(e, "Failed to get user info from osu.ppy for DiscordUserId: {DiscordId}, OsuUserId: {OsuUserId}", user.Id,
                 user.OsuId);
             return null;
         }

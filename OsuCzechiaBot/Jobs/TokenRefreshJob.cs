@@ -12,7 +12,7 @@ public class TokenRefreshJob(IServiceProvider serviceProvider) : BackgroundServi
         {
             var currentTime = DateTimeOffset.UtcNow;
             var nextStartTime = currentTime.AddSeconds(DelaySeconds);
-            await using var scope = serviceProvider.CreateAsyncScope();
+            var scope = serviceProvider.CreateAsyncScope();
             var provider = scope.ServiceProvider;
 
             var dbService = provider.GetRequiredService<AuthorizedUserDatabaseService>();
@@ -37,6 +37,7 @@ public class TokenRefreshJob(IServiceProvider serviceProvider) : BackgroundServi
             }
         
             logger.LogInformation("Updated {Count} user tokens", successCount);
+            await scope.DisposeAsync();
             await Task.Delay(nextStartTime - currentTime, stoppingToken);
         }
     }
