@@ -8,6 +8,7 @@ public class DiscordConfiguration
     public ulong GuildId { get; set; }
     public ulong AuthChannelId { get; set; }
     public ulong LogChannelId { get; set; }
+    public ulong AdminChannelId { get; set; }
     public ulong AuthorizedRoleId { get; set; }
     
     public ulong OneDigitRoleId { get; set; }
@@ -32,7 +33,20 @@ public class DiscordConfiguration
         SevenDigitRoleId,
         EightDigitRoleId,
         NineDigitRoleId,
-        TenDigitRoleId
+        TenDigitRoleId,
+    ];
+    
+    public ulong Top1RoleId { get; set; }
+    public ulong Top10RoleId { get; set; }
+    public ulong Top50RoleId { get; set; }
+    public ulong Top100RoleId { get; set; }
+
+    public ulong[] AllCountryDigitRoleIds =>
+    [
+        Top1RoleId,
+        Top10RoleId,
+        Top50RoleId,
+        Top100RoleId,
     ];
 
     public void Validate()

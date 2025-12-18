@@ -1,6 +1,6 @@
 ﻿services:
   database-postgresql:
-    image: postgres
+    image: postgres:17.7
     restart: always
     environment:
       - POSTGRES_USER=postgres

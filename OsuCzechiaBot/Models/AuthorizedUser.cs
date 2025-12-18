@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using OsuCzechiaBot.Models.Interfaces;
 
 namespace OsuCzechiaBot.Models;
 
-public class AuthorizedUser
+public class AuthorizedUser : IIdentifiable
 {
     [Key]
-    public ulong DiscordId { get; set; }
+    public ulong Id { get; set; }
     
     [Required]
     public int OsuId { get; set; }
