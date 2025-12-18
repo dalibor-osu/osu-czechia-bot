@@ -36,17 +36,17 @@ public class DiscordConfiguration
         TenDigitRoleId,
     ];
     
-    public ulong Top1RoleId { get; set; }
-    public ulong Top10RoleId { get; set; }
-    public ulong Top50RoleId { get; set; }
-    public ulong Top100RoleId { get; set; }
+    public ulong TopOneRoleId { get; set; }
+    public ulong TopTenRoleId { get; set; }
+    public ulong TopFiftyRoleId { get; set; }
+    public ulong TopHundredRoleId { get; set; }
 
     public ulong[] AllCountryDigitRoleIds =>
     [
-        Top1RoleId,
-        Top10RoleId,
-        Top50RoleId,
-        Top100RoleId,
+        TopOneRoleId,
+        TopTenRoleId,
+        TopFiftyRoleId,
+        TopHundredRoleId,
     ];
 
     public void Validate()

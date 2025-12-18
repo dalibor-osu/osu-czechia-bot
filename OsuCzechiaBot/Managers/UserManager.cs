@@ -20,10 +20,14 @@ public class UserManager(
 
     public async Task MessageUserAsync(ulong discordId, string message, CancellationToken cancellationToken = default)
     {
+        var guildUser = await GetGuildUserAsync(discordId, cancellationToken);
+        if (guildUser is null)
+        {
+            return;
+        }
+
         try
         {
-            var guildUser =
-                await restClient.GetGuildUserAsync(configurationAccessor.Discord.GuildId, discordId, cancellationToken: cancellationToken);
             var dmChannel = await guildUser.GetDMChannelAsync(cancellationToken: cancellationToken);
             await dmChannel.SendMessageAsync(new MessageProperties
             {
@@ -36,7 +40,8 @@ public class UserManager(
         }
     }
 
-    public async Task UpdateUserRoles(AuthorizedUser user, bool authorize, OsuUserExtendedWithOptionalData? userData = null,
+    public async Task UpdateUserRoles(AuthorizedUser user, bool authorize,
+        OsuUserExtendedWithOptionalData? userData = null,
         CancellationToken cancellationToken = default)
     {
         userData ??= await osuHttpClient.GetUserData(user);
@@ -46,7 +51,11 @@ public class UserManager(
             return;
         }
 
-        await RemoveAllUserRankRoles(user, cancellationToken);
+        if (!await RemoveAllUserRankRoles(user, cancellationToken))
+        {
+            return;
+        }
+
         if (cancellationToken.IsCancellationRequested)
         {
             return;
@@ -61,7 +70,7 @@ public class UserManager(
 
 
         ulong newCountryRankRoleId = GetCountryRankRoleIdForUser(userData);
-        if (newCountryRankRoleId != 0)
+        if (newCountryRankRoleId != 0 && userData.IsCzech())
         {
             await restClient.AddGuildUserRoleAsync(configurationAccessor.Discord.GuildId, user.Id, newCountryRankRoleId,
                 cancellationToken: cancellationToken);
@@ -69,7 +78,8 @@ public class UserManager(
 
         if (authorize)
         {
-            await restClient.AddGuildUserRoleAsync(configurationAccessor.Discord.GuildId, user.Id, configurationAccessor.Discord.AuthorizedRoleId,
+            await restClient.AddGuildUserRoleAsync(configurationAccessor.Discord.GuildId, user.Id,
+                configurationAccessor.Discord.AuthorizedRoleId,
                 cancellationToken: cancellationToken);
         }
     }
@@ -84,7 +94,8 @@ public class UserManager(
             {
                 await interaction.SendFollowupMessageAsync(new InteractionMessageProperties
                 {
-                    Content = "Couldn't unlink your osu! profile, because you are not authorized yet. Please use the */authorize* command.",
+                    Content =
+                        "Couldn't unlink your osu! profile, because you are not authorized yet. Please use the */authorize* command.",
                     Flags = MessageFlags.Ephemeral
                 }, cancellationToken: cancellationToken);
             }
@@ -92,16 +103,28 @@ public class UserManager(
             return false;
         }
 
-        await RemoveAllUserRankRoles(existingUser, cancellationToken);
-        await restClient.RemoveGuildUserRoleAsync(configurationAccessor.Discord.GuildId, discordId, configurationAccessor.Discord.AuthorizedRoleId,
+        if (!await RemoveAllUserRankRoles(existingUser, cancellationToken))
+        {
+            return false;
+        }
+
+        await restClient.RemoveGuildUserRoleAsync(configurationAccessor.Discord.GuildId, discordId,
+            configurationAccessor.Discord.AuthorizedRoleId,
             cancellationToken: cancellationToken);
         return true;
     }
 
-    public async Task TimeOutUserAsync(ulong discordId, TimeSpan duration, string? reason = null, CancellationToken cancellationToken = default)
+    public async Task TimeOutUserAsync(ulong discordId, TimeSpan duration, string? reason = null,
+        CancellationToken cancellationToken = default)
     {
-        var guildUser = await restClient.GetGuildUserAsync(configurationAccessor.Discord.GuildId, discordId, cancellationToken: cancellationToken);
-        await guildUser.ModifyAsync((options => options.WithTimeOutUntil(DateTimeOffset.Now + duration)), cancellationToken: cancellationToken);
+        var guildUser = await GetGuildUserAsync(discordId, cancellationToken);
+        if (guildUser is null)
+        {
+            return;
+        }
+
+        await guildUser.ModifyAsync((options => options.WithTimeOutUntil(DateTimeOffset.Now + duration)),
+            cancellationToken: cancellationToken);
         if (string.IsNullOrWhiteSpace(reason))
         {
             return;
@@ -152,11 +175,17 @@ public class UserManager(
         return true;
     }
 
-    public async Task<bool> RenameUserAsync(ulong discordId, string newName, CancellationToken cancellationToken = default)
+    public async Task<bool> RenameUserAsync(ulong discordId, string newName,
+        CancellationToken cancellationToken = default)
     {
+        var user = await GetGuildUserAsync(discordId, cancellationToken);
+        if (user is null)
+        {
+            return false;
+        }
+
         try
         {
-            var user = await restClient.GetGuildUserAsync(configurationAccessor.Discord.GuildId, discordId, cancellationToken: cancellationToken);
             await user.ModifyAsync(u => u.WithNickname(newName), cancellationToken: cancellationToken);
         }
         catch (Exception e)
@@ -168,11 +197,31 @@ public class UserManager(
         return true;
     }
 
-    private async Task RemoveAllUserRankRoles(AuthorizedUser user, CancellationToken cancellationToken = default)
+    public async Task<GuildUser?> GetGuildUserAsync(ulong discordId, CancellationToken cancellationToken = default)
     {
-        var guildUser =
-            await restClient.GetGuildUserAsync(configurationAccessor.Discord.GuildId, user.Id, cancellationToken: cancellationToken);
-        foreach (ulong roleId in configurationAccessor.Discord.AllDigitRoleIds.Concat(configurationAccessor.Discord.AllCountryDigitRoleIds))
+        try
+        {
+            var guildUser = await restClient.GetGuildUserAsync(configurationAccessor.Discord.GuildId, discordId,
+                cancellationToken: cancellationToken);
+            return guildUser;
+        }
+        catch (Exception e)
+        {
+            logger.LogError("Failed to get guild user: {Message}", e.Message);
+            return null;
+        }
+    }
+
+    private async Task<bool> RemoveAllUserRankRoles(AuthorizedUser user, CancellationToken cancellationToken = default)
+    {
+        var guildUser = await GetGuildUserAsync(user.Id, cancellationToken);
+        if (guildUser is null)
+        {
+            return false;
+        }
+
+        foreach (ulong roleId in configurationAccessor.Discord.AllDigitRoleIds.Concat(configurationAccessor.Discord
+                     .AllCountryDigitRoleIds))
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -186,6 +235,8 @@ public class UserManager(
 
             await guildUser.RemoveRoleAsync(roleId, cancellationToken: cancellationToken);
         }
+
+        return true;
     }
 
     private ulong GetRankRoleIdForUser(OsuUserExtendedWithOptionalData userData)
@@ -212,7 +263,7 @@ public class UserManager(
         };
     }
 
-    private ulong GetCountryRankRoleIdForUser(OsuUserExtendedWithOptionalData userData)
+    public ulong GetCountryRankRoleIdForUser(OsuUserExtendedWithOptionalData userData)
     {
         ulong rank = userData.GetMainCountryGlobalRank();
         if (rank == 0)
@@ -222,10 +273,10 @@ public class UserManager(
 
         return rank switch
         {
-            < 2 => configurationAccessor.Discord.Top1RoleId,
-            <= 10 => configurationAccessor.Discord.Top10RoleId,
-            <= 50 => configurationAccessor.Discord.Top50RoleId,
-            <= 100 => configurationAccessor.Discord.Top100RoleId,
+            < 2 => configurationAccessor.Discord.TopOneRoleId,
+            <= 10 => configurationAccessor.Discord.TopTenRoleId,
+            <= 50 => configurationAccessor.Discord.TopFiftyRoleId,
+            <= 100 => configurationAccessor.Discord.TopHundredRoleId,
             _ => 0
         };
     }

@@ -41,8 +41,9 @@ app.MapGet("/authorize", async (
         string responseMessage = await authManager.AuthorizeUserAsync(discordId, code);
         await httpContext.Response.WriteAsync(responseMessage);
     }
-    catch
+    catch (Exception e)
     {
+        Log.Error(e, "Something went wrong when authorizing user: {Message}", e.Message);
         await httpContext.Response.WriteAsync(HtmlResponses.AuthFailed);
     }
     

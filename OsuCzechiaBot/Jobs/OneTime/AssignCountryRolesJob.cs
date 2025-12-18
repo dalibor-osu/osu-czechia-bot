@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using System.Text;
+using NetCord.Rest;
 using OsuCzechiaBot.Clients;
+using OsuCzechiaBot.Configuration;
 using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Jobs.OneTime.Base;
 using OsuCzechiaBot.Managers;
@@ -8,9 +10,12 @@ using OsuCzechiaBot.Managers;
 namespace OsuCzechiaBot.Jobs.OneTime;
 
 public class AssignCountryRolesJob(
+    ILogger<AssignCountryRolesJob> logger,
     AuthorizedUserDatabaseService authorizedUserDatabaseService,
     OsuHttpClient osuHttpClient,
     UserManager userManager,
+    RestClient restClient,
+    ConfigurationAccessor configurationAccessor,
     DiscordLogManager discordLogManager) : OneTimeJob
 {
     public override string Key => nameof(AssignCountryRolesJob);
@@ -21,7 +26,7 @@ public class AssignCountryRolesJob(
         var users = await authorizedUserDatabaseService.ListAsync();
         var stopwatch = new Stopwatch();
         var failedIds = new List<(ulong id, int osuId)>(users.Count);
-        
+
         foreach (var user in users)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -30,31 +35,41 @@ public class AssignCountryRolesJob(
                     LogLevel.Warning);
                 return;
             }
+
             stopwatch.Restart();
             if (!user.Authorized)
             {
                 continue;
             }
 
-            var data = await osuHttpClient.GetUserData(user);
-            if (data is null)
+            try
+            {
+                var data = await osuHttpClient.GetUserData(user);
+                if (data is null)
+                {
+                    logger.LogError("Failed to get data for user: {UserId}", user.Id);
+                    failedIds.Add((user.Id, user.OsuId));
+                    continue;
+                }
+
+                await userManager.UpdateUserRoles(user, false, data, cancellationToken);
+            }
+            catch (Exception e)
             {
                 failedIds.Add((user.Id, user.OsuId));
-                await WaitForTimeout(stopwatch.ElapsedMilliseconds, cancellationToken);
-                continue;
+                logger.LogError("Failed to update country role for user: {UserId}. Message: {Message}", user.Id,
+                    e.Message);
             }
-
-            await userManager.UpdateUserRoles(user, false, data, cancellationToken);
+            finally
+            {
+                await WaitForTimeout(stopwatch.ElapsedMilliseconds, cancellationToken);
+            }
         }
 
-        var stringBuilder = new StringBuilder($"Finished assigning country roles.");
+        var stringBuilder = new StringBuilder("Finished assigning country roles.");
         if (failedIds.Count != 0)
         {
-            stringBuilder.Append(" Failed to update for these users:");
-            foreach ((ulong id, int osuId) in failedIds)
-            {
-                stringBuilder.AppendLine($"\tID: {id}, OSU_ID: {osuId}");
-            }
+            stringBuilder.Append($" Failed to update for {failedIds.Count} users.");
         }
 
         await discordLogManager.Log(stringBuilder.ToString());
@@ -67,7 +82,7 @@ public class AssignCountryRolesJob(
         {
             return;
         }
-        
+
         await Task.Delay(TimeSpan.FromMilliseconds(remainingMilliseconds), cancellationToken);
     }
 }

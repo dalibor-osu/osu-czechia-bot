@@ -27,4 +27,6 @@ public static class OsuUserExtensions
 
     public static OsuRuleset GetMainRuleset(this OsuUserExtendedWithOptionalData userData) =>
         EnumHelper.ParseOrDefault(userData.Playmode, OsuRuleset.Osu);
+    
+    public static bool IsCzech(this OsuUserExtendedWithOptionalData userData) => "CZ".Equals(userData.CountryCode, StringComparison.OrdinalIgnoreCase);
 }
