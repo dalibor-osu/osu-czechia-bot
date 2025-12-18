@@ -35,7 +35,7 @@ public static class WebApplicationBuilderExtensions
                 .ReadFrom.Configuration(builder.Configuration)
                 .WriteTo.Console()
                 #if RELEASE
-                .WriteTo.File(path: "/app/logs/log-.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7, restrictedToMinimumLevel: LogEventLevel.Warning)
+                .WriteTo.File(path: "/app/logs/log-.txt", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 7, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
                 #endif
                 .Enrich.FromLogContext();
         });
