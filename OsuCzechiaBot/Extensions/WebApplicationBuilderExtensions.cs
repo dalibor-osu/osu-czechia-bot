@@ -13,6 +13,7 @@ using OsuCzechiaBot.Database;
 using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Exceptions;
 using OsuCzechiaBot.Jobs;
+using OsuCzechiaBot.Jobs.OneTime;
 using OsuCzechiaBot.Managers;
 using Serilog;
 
@@ -49,8 +50,12 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddScoped<UserManager>();
         builder.Services.AddScoped<AuthManager>();
+        builder.Services.AddScoped<DiscordLogManager>();
 
+        // Jobs
         builder.Services.AddHostedService<TokenRefreshJob>();
+        builder.Services.AddHostedService<OneTimeJobRunner>();
+        builder.Services.AddOneTimeJob<AssignCountryRolesJob>();
 
         return builder;
     }
@@ -83,6 +88,7 @@ public static class WebApplicationBuilderExtensions
         });
 
         builder.Services.AddScoped<AuthorizedUserDatabaseService>();
+        builder.Services.AddScoped<OneTimeJobLogDatabaseService>();
 
         return builder;
     }

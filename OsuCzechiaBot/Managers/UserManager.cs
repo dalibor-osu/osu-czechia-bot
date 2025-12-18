@@ -214,7 +214,7 @@ public class UserManager(
 
     private ulong GetCountryRankRoleIdForUser(OsuUserExtendedWithOptionalData userData)
     {
-        ulong rank = userData.GetMainGlobalRank();
+        ulong rank = userData.GetMainCountryGlobalRank();
         if (rank == 0)
         {
             return 0;

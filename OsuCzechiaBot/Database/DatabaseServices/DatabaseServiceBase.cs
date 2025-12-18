@@ -66,6 +66,11 @@ public abstract class DatabaseServiceBase<T, TId>(OsuCzechiaBotDatabaseContext d
         return await DbSet.Where(e => idList.Contains(e.Id)).ToListAsync();
     }
 
+    public virtual async Task<IReadOnlyCollection<T>> ListAsync(int offset = 0, int limit = int.MaxValue)
+    {
+        return await DbSet.Skip(offset).Take(limit).ToListAsync();
+    }
+
     public virtual async Task<T?> RemoveAsync(TId id)
     {
         var entity = await DbSet.FirstOrDefaultAsync(e => e.Id.Equals(id));
