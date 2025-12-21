@@ -63,6 +63,18 @@ public class UserManager(
             return;
         }
 
+        if (authorize)
+        {
+            await restClient.AddGuildUserRoleAsync(configurationAccessor.Discord.GuildId, user.Id,
+                configurationAccessor.Discord.AuthorizedRoleId,
+                cancellationToken: cancellationToken);
+        }
+
+        if (userData.IsRestricted)
+        {
+            return;
+        }
+
         ulong newRankRoleId = GetRankRoleIdForUser(userData);
         if (newRankRoleId != 0)
         {
@@ -75,13 +87,6 @@ public class UserManager(
         if (newCountryRankRoleId != 0 && userData.IsCzech())
         {
             await restClient.AddGuildUserRoleAsync(configurationAccessor.Discord.GuildId, user.Id, newCountryRankRoleId,
-                cancellationToken: cancellationToken);
-        }
-
-        if (authorize)
-        {
-            await restClient.AddGuildUserRoleAsync(configurationAccessor.Discord.GuildId, user.Id,
-                configurationAccessor.Discord.AuthorizedRoleId,
                 cancellationToken: cancellationToken);
         }
     }
@@ -160,7 +165,7 @@ public class UserManager(
             user.Expires = null;
             await dbService.UpdateAsync(user);
 
-            await discordLogManager.Log(
+            await discordLogManager.LogAsync(
                 $"Failed to update token for <@{user.Id}> ({user.GetMarkdownOsuProfileLink()})! This user is now marked as not authorized.",
                 LogLevel.Error,
                 cancellationToken);

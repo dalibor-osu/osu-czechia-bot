@@ -17,7 +17,7 @@ public class OneTimeJobRunner(IServiceProvider provider) : BackgroundService
             return;
         }
 
-        var dbService = provider.GetRequiredService<OneTimeJobLogDatabaseService>();
+        var dbService = scope.ServiceProvider.GetRequiredService<OneTimeJobLogDatabaseService>();
         var alreadyRunList = await dbService.GetManyAsync(oneTimeJobs.Select(otj => otj.Key).ToList());
         var toRunList = oneTimeJobs.Where(oneTimeJob => alreadyRunList.All(alreadyRunJob => alreadyRunJob.Id != oneTimeJob.Key)).ToList();
         if (toRunList.Count == 0)

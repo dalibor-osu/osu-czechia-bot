@@ -27,7 +27,7 @@ public class AssignCountryRolesJob(
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                await discordLogManager.Log($"{nameof(AssignCountryRolesJob)} was canceled and will run again.",
+                await discordLogManager.LogAsync($"{nameof(AssignCountryRolesJob)} was canceled and will run again.",
                     LogLevel.Warning);
                 return;
             }
@@ -68,7 +68,7 @@ public class AssignCountryRolesJob(
             stringBuilder.Append($" Failed to update for {failedIds.Count} users.");
         }
 
-        await discordLogManager.Log(stringBuilder.ToString());
+        await discordLogManager.LogAsync(stringBuilder.ToString());
     }
 
     private static async Task WaitForTimeout(long elapsedMilliseconds, CancellationToken cancellationToken)

@@ -8,7 +8,7 @@ public class DiscordLogManager(
     RestClient restClient,
     ConfigurationAccessor configurationAccessor)
 {
-    public async Task Log(string message, LogLevel logLevel = LogLevel.Information, CancellationToken cancellationToken = default)
+    public async Task LogAsync(string message, LogLevel logLevel = LogLevel.Information, CancellationToken cancellationToken = default)
     {
         try
         {

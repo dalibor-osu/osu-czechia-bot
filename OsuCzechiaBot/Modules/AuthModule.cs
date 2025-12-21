@@ -20,11 +20,25 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
         {
             await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
             {
-                Content = $"You are already authorized with this {authorizedUser.GetMarkdownOsuProfileLink()}. If you'd like to link a different account, use the */unlink* command first.",
+                Content =
+                    $"You are already authorized with this {authorizedUser.GetMarkdownOsuProfileLink()}. If you'd like to link a different account, use the */unlink* command first.",
                 Flags = MessageFlags.Ephemeral
             }));
             return;
         }
+
+        var existingUser = await userManager.GetGuildUserAsync(userId);
+        if (existingUser is null)
+        {
+            await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
+            {
+                Content =
+                    $"It looks like you are not member of osu! Czechia server and thus can't perform an authorization. Please join using this invite link first: {configurationAccessor.Discord.InviteLink}",
+                Flags = MessageFlags.Ephemeral
+            }));
+            return;
+        }
+
         await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
         {
             Content = $"Please authorize via this link: {GetAuthUrl(userId)}",
@@ -36,6 +50,18 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
     public async Task UnlinkAsync()
     {
         ulong discordId = Context.User.Id;
+        var existingUser = await userManager.GetGuildUserAsync(discordId);
+        if (existingUser is null)
+        {
+            await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
+            {
+                Content =
+                    $"It looks like you are not member of osu! Czechia server and thus can't perform an unlink. If you were verified and left the server, your profiles were automatically unlinked.",
+                Flags = MessageFlags.Ephemeral
+            }));
+            return;
+        }
+
         await RespondAsync(InteractionCallback.DeferredMessage(MessageFlags.Ephemeral));
         bool success = await userManager.UnlinkUserAsync(discordId, Context.Interaction, CancellationToken.None);
         if (!success)
