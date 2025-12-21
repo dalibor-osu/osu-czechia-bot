@@ -1,4 +1,6 @@
 using OsuCzechiaBot.Exceptions;
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 namespace OsuCzechiaBot.Configuration;
 
