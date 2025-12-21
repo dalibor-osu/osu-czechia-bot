@@ -1,6 +1,7 @@
 using NetCord.Gateway;
 using NetCord.Hosting.Gateway;
 using OsuCzechiaBot.Configuration;
+using OsuCzechiaBot.Constants;
 using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Managers;
 
@@ -31,11 +32,11 @@ public sealed class UserRemoveHandler : IGuildUserRemoveGatewayHandler, IDisposa
         var removedUser = await _dbService.RemoveAsync(arg.User.Id);
         if (removedUser is null)
         {
-            await _discordLogManager.LogAsync($"User <@{arg.User.Id}> left.");
+            await _discordLogManager.LogAsync(string.Format(BotMessages.Events.UserLeft, arg.User.Id));
             return;
         }
 
-        await _discordLogManager.LogAsync($"User <@{arg.User.Id}> left. They were unlinked and removed from the database.");
+        await _discordLogManager.LogAsync(string.Format(BotMessages.Events.UserLeftAndUnlinked, arg.User.Id));
     }
 
     public void Dispose()

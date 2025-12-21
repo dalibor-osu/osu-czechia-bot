@@ -2,6 +2,7 @@ using NetCord;
 using NetCord.Rest;
 using NetCord.Services.ApplicationCommands;
 using OsuCzechiaBot.Configuration;
+using OsuCzechiaBot.Constants;
 using OsuCzechiaBot.Extensions;
 using OsuCzechiaBot.Managers;
 
@@ -20,8 +21,7 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
         {
             await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
             {
-                Content =
-                    $"You are already authorized with this {authorizedUser.GetMarkdownOsuProfileLink()}. If you'd like to link a different account, use the */unlink* command first.",
+                Content = string.Format(BotMessages.Commands.Authorize.AlreadyAuthorized, authorizedUser.GetMarkdownOsuProfileLink()),
                 Flags = MessageFlags.Ephemeral
             }));
             return;
@@ -32,8 +32,7 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
         {
             await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
             {
-                Content =
-                    $"It looks like you are not member of osu! Czechia server and thus can't perform an authorization. Please join using this invite link first: {configurationAccessor.Discord.InviteLink}",
+                Content = string.Format(BotMessages.Commands.Authorize.NotAMember, configurationAccessor.Discord.InviteLink),
                 Flags = MessageFlags.Ephemeral
             }));
             return;
@@ -41,7 +40,7 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
 
         await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
         {
-            Content = $"Please authorize via this link: {GetAuthUrl(userId)}",
+            Content = string.Format(BotMessages.Commands.Authorize.AuthorizeWithLink, GetAuthUrl(userId)),
             Flags = MessageFlags.Ephemeral
         }));
     }
@@ -55,8 +54,7 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
         {
             await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
             {
-                Content =
-                    $"It looks like you are not member of osu! Czechia server and thus can't perform an unlink. If you were verified and left the server, your profiles were automatically unlinked.",
+                Content = BotMessages.Commands.Unlink.NotAMember,
                 Flags = MessageFlags.Ephemeral
             }));
             return;
@@ -71,7 +69,7 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
 
         await Context.Interaction.SendFollowupMessageAsync(new InteractionMessageProperties
         {
-            Content = "Your osu! profile has been unlinked. You will have to authorize again using the */authorize* command.",
+            Content = BotMessages.Commands.Unlink.Unlinked,
             Flags = MessageFlags.Ephemeral
         });
     }

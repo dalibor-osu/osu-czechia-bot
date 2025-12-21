@@ -59,21 +59,24 @@ public class AuthManager(
             {
                 if (!osuUserData.Username.Equals(user.Nickname, StringComparison.OrdinalIgnoreCase))
                 {
-                    await user.ModifyAsync(guidUser => guidUser.WithNickname($"{user.Nickname} ({osuUserData.Username})"), cancellationToken: cancellationToken);
+                    await user.ModifyAsync(guidUser => guidUser.WithNickname($"{user.Nickname} ({osuUserData.Username})"),
+                        cancellationToken: cancellationToken);
                 }
             }
             else if (!string.IsNullOrWhiteSpace(user.GlobalName))
             {
                 if (!osuUserData.Username.Equals(user.GlobalName, StringComparison.OrdinalIgnoreCase))
                 {
-                    await user.ModifyAsync(guidUser => guidUser.WithNickname($"{user.GlobalName} ({osuUserData.Username})"), cancellationToken: cancellationToken);
+                    await user.ModifyAsync(guidUser => guidUser.WithNickname($"{user.GlobalName} ({osuUserData.Username})"),
+                        cancellationToken: cancellationToken);
                 }
             }
             else
             {
                 if (!osuUserData.Username.Equals(user.Username, StringComparison.OrdinalIgnoreCase))
                 {
-                    await user.ModifyAsync(guidUser => guidUser.WithNickname($"{user.Username} ({osuUserData.Username})"), cancellationToken: cancellationToken);
+                    await user.ModifyAsync(guidUser => guidUser.WithNickname($"{user.Username} ({osuUserData.Username})"),
+                        cancellationToken: cancellationToken);
                 }
             }
         }
@@ -84,7 +87,7 @@ public class AuthManager(
 
         await authorizedUserDatabaseService.AddOrUpdateAsync(authorizedUser);
         await restClient.SendMessageAsync(configurationAccessor.Discord.LogChannelId,
-            $"Successfully authorized <@{discordId}> with {authorizedUser.GetMarkdownOsuProfileLink()}!",
+            string.Format(BotMessages.Commands.Authorize.SuccessfullyAuthorized, discordId, authorizedUser.GetMarkdownOsuProfileLink()),
             cancellationToken: cancellationToken);
 
         return HtmlResponses.AuthSuccess;

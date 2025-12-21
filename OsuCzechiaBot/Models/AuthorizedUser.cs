@@ -19,7 +19,6 @@ public class AuthorizedUser : IIdentifiable
     [MaxLength(1024)]
     public string RefreshToken { get; set; } = string.Empty;
     
-    [Required]
     public DateTimeOffset? Expires { get; set; }
     
     [Required]

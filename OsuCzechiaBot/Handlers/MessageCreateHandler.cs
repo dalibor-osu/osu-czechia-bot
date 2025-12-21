@@ -3,6 +3,7 @@ using NetCord;
 using NetCord.Gateway;
 using NetCord.Hosting.Gateway;
 using OsuCzechiaBot.Configuration;
+using OsuCzechiaBot.Constants;
 using OsuCzechiaBot.Managers;
 
 namespace OsuCzechiaBot.Handlers;
@@ -45,7 +46,7 @@ public class MessageCreateHandler : IMessageCreateGatewayHandler
         {
             await using var scope = _serviceProvider.CreateAsyncScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
-            await userManager.TimeOutUserAsync(arg.Author.Id, TimeSpan.FromMinutes(1), "Too many messages in authorization channel. If you'd like to get help, contact anyone from the Mod team.");
+            await userManager.TimeOutUserAsync(arg.Author.Id, TimeSpan.FromMinutes(1), BotMessages.Events.AuthTimeOut);
         }
 
         await arg.DeleteAsync();
