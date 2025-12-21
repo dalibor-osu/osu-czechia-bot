@@ -23,6 +23,7 @@ services:
         CONFIGURATION: Development
     environment:
       - Discord__Token=your token
+      - Discord__InviteLink=your invite link
       - Discord__GuildId=123
       - Discord__AuthChannelId=123
       - Discord__LogChannelId=123
