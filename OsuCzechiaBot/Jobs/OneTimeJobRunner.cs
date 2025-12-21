@@ -38,7 +38,7 @@ public class OneTimeJobRunner(IServiceProvider provider) : BackgroundService
         await Task.WhenAll(plannedJobs);
     }
 
-    private async Task RunJobDelayed(IOneTimeJob oneTimeJob, OneTimeJobLogDatabaseService dbService, CancellationToken stoppingToken)
+    private static async Task RunJobDelayed(IOneTimeJob oneTimeJob, OneTimeJobLogDatabaseService dbService, CancellationToken stoppingToken)
     {
         var currentTime = DateTimeOffset.UtcNow;
         if (oneTimeJob.RunAt!.Value <= currentTime)
@@ -56,7 +56,7 @@ public class OneTimeJobRunner(IServiceProvider provider) : BackgroundService
         await RunJobNow(oneTimeJob, dbService, stoppingToken);
     }
 
-    private async Task RunJobNow(IOneTimeJob oneTimeJob, OneTimeJobLogDatabaseService dbService, CancellationToken stoppingToken)
+    private static async Task RunJobNow(IOneTimeJob oneTimeJob, OneTimeJobLogDatabaseService dbService, CancellationToken stoppingToken)
     {
         if (await dbService.ExistsAsync(oneTimeJob.Key))
         {
