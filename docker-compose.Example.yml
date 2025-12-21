@@ -24,6 +24,7 @@ services:
     environment:
       - Discord__Token=your token
       - Discord__InviteLink=your invite link
+      - Discord__BotAdminUserId=123
       - Discord__GuildId=123
       - Discord__AuthChannelId=123
       - Discord__LogChannelId=123

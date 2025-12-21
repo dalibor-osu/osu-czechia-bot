@@ -7,6 +7,7 @@ public class DiscordConfiguration
     public string Token { get; set; } = string.Empty;
     public string InviteLink { get; set; } = string.Empty;
     public ulong GuildId { get; set; }
+    public ulong BotAdminUserId { get; set; }
     public ulong AuthChannelId { get; set; }
     public ulong LogChannelId { get; set; }
     public ulong AdminChannelId { get; set; }
