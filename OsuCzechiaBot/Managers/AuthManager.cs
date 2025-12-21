@@ -24,11 +24,14 @@ public class AuthManager(
             return HtmlResponses.AuthAlreadyAuthorized;
         }
 
-        var tokenResponse = await osuHttpClient.GetTokenFromCode(code);
-        if (tokenResponse == null)
+        var tokenResponseResult = await osuHttpClient.GetTokenFromCode(code);
+        if (!tokenResponseResult.Success)
         {
+            logger.LogError(tokenResponseResult.Error);
             return HtmlResponses.AuthFailed;
         }
+
+        var tokenResponse = tokenResponseResult.Value;
 
         var authorizedUser = new AuthorizedUser
         {

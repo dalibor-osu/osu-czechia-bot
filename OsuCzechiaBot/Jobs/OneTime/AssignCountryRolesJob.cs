@@ -1,8 +1,6 @@
 using System.Diagnostics;
 using System.Text;
-using NetCord.Rest;
 using OsuCzechiaBot.Clients;
-using OsuCzechiaBot.Configuration;
 using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Jobs.OneTime.Base;
 using OsuCzechiaBot.Managers;
@@ -14,8 +12,6 @@ public class AssignCountryRolesJob(
     AuthorizedUserDatabaseService authorizedUserDatabaseService,
     OsuHttpClient osuHttpClient,
     UserManager userManager,
-    RestClient restClient,
-    ConfigurationAccessor configurationAccessor,
     DiscordLogManager discordLogManager) : OneTimeJob
 {
     public override string Key => nameof(AssignCountryRolesJob);
@@ -57,7 +53,7 @@ public class AssignCountryRolesJob(
             catch (Exception e)
             {
                 failedIds.Add((user.Id, user.OsuId));
-                logger.LogError("Failed to update country role for user: {UserId}. Message: {Message}", user.Id,
+                logger.LogError(e, "Failed to update country role for user: {UserId}. Message: {Message}", user.Id,
                     e.Message);
             }
             finally
@@ -75,7 +71,7 @@ public class AssignCountryRolesJob(
         await discordLogManager.Log(stringBuilder.ToString());
     }
 
-    private async Task WaitForTimeout(long elapsedMilliseconds, CancellationToken cancellationToken)
+    private static async Task WaitForTimeout(long elapsedMilliseconds, CancellationToken cancellationToken)
     {
         long remainingMilliseconds = MillisecondsPerUser - elapsedMilliseconds;
         if (remainingMilliseconds <= 0)

@@ -1,5 +1,7 @@
+using System.Net;
 using System.Net.Http.Headers;
 using OsuCzechiaBot.Configuration;
+using OsuCzechiaBot.Helpers.Optionals;
 using OsuCzechiaBot.Models;
 using OsuCzechiaBot.Models.OsuApi;
 
@@ -7,7 +9,7 @@ namespace OsuCzechiaBot.Clients;
 
 public class OsuHttpClient(HttpClient httpClient, ILogger<OsuHttpClient> logger, ConfigurationAccessor configurationAccessor)
 {
-    public async Task<TokenResponse?> GetTokenFromCode(string code)
+    public async Task<Optional<TokenResponse>> GetTokenFromCode(string code)
     {
         var request = new TokenFromCodeRequest
         {
@@ -19,7 +21,7 @@ public class OsuHttpClient(HttpClient httpClient, ILogger<OsuHttpClient> logger,
         return await GetTokenAsync(JsonContent.Create(request));
     }
 
-    public async Task<TokenResponse?> GetTokenFromRefreshToken(string refreshToken)
+    public async Task<Optional<TokenResponse>> GetTokenFromRefreshToken(string refreshToken)
     {
         var request = new TokenFromRefreshTokenRequest
         {
@@ -31,7 +33,8 @@ public class OsuHttpClient(HttpClient httpClient, ILogger<OsuHttpClient> logger,
         return await GetTokenAsync(JsonContent.Create(request));
     }
 
-    private async Task<TokenResponse?> GetTokenAsync(JsonContent content) {
+    private async Task<Optional<TokenResponse>> GetTokenAsync(JsonContent content)
+    {
         const string url = "oauth/token";
         HttpResponseMessage response;
         try
@@ -41,24 +44,32 @@ public class OsuHttpClient(HttpClient httpClient, ILogger<OsuHttpClient> logger,
         catch (Exception e)
         {
             logger.LogError(e, "An error occured while trying to get token from osu.ppy");
-            return null;
+            return new Error { ErrorType = ErrorType.ServiceError, Message = e.Message };
         }
+
 
         if (!response.IsSuccessStatusCode)
         {
             string body = await response.Content.ReadAsStringAsync();
+            if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
+            {
+                logger.LogError("Failed authorize user in osu.ppy. Status code: {StatusCode}, Body: {Body}", response.StatusCode, body);
+                return new Error { ErrorType = ErrorType.Forbidden, Message = "Failed authorize user in osu.ppy" };
+            }
+
             logger.LogError("Failed to get token from osu.ppy. Status code: {StatusCode}, Body: {Body}", response.StatusCode, body);
-            return null;
+            return new Error { ErrorType = ErrorType.ServiceError, Message = "Failed authorize user in osu.ppy" };
         }
 
         try
         {
-            return await response.Content.ReadFromJsonAsync<TokenResponse>();
+            var result = await response.Content.ReadFromJsonAsync<TokenResponse>();
+            return result is not null ? result : new Error { ErrorType = ErrorType.ServiceError, Message = "Failed to serialize token response" };
         }
         catch (Exception e)
         {
             logger.LogError(e, "Failed to read token response");
-            return null;
+            return new Error { ErrorType = ErrorType.ServiceError, Message = "Failed to serialize token response" };
         }
     }
 

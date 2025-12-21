@@ -4,6 +4,7 @@ using OsuCzechiaBot.Clients;
 using OsuCzechiaBot.Configuration;
 using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Extensions;
+using OsuCzechiaBot.Helpers.Optionals;
 using OsuCzechiaBot.Models;
 using OsuCzechiaBot.Models.OsuApi;
 
@@ -14,7 +15,8 @@ public class UserManager(
     ConfigurationAccessor configurationAccessor,
     RestClient restClient,
     OsuHttpClient osuHttpClient,
-    AuthorizedUserDatabaseService dbService)
+    AuthorizedUserDatabaseService dbService,
+    DiscordLogManager discordLogManager)
 {
     public async Task<AuthorizedUser?> GetAsync(ulong discordId) => await dbService.GetByDiscordIdAsync(discordId);
 
@@ -142,27 +144,35 @@ public class UserManager(
             return false;
         }
 
-        TokenResponse? tokenResponse;
-        try
+        var currentTime = DateTimeOffset.UtcNow;
+        var tokenResponseResult = await osuHttpClient.GetTokenFromRefreshToken(user.RefreshToken);
+        if (!tokenResponseResult.Success)
         {
-            tokenResponse = await osuHttpClient.GetTokenFromRefreshToken(user.RefreshToken);
-        }
-        catch (Exception e)
-        {
+            logger.LogError("Failed to get new tokens for user: {UserId} | {Message}", discordId, tokenResponseResult.Error.Message);
+            if (tokenResponseResult.Error.ErrorType != ErrorType.Forbidden && !(user.Expires <= currentTime))
+            {
+                return false;
+            }
+
             user.Authorized = false;
-            logger.LogError(e, "Failed to get new tokens for user: {UserId}", discordId);
+            user.AccessToken = string.Empty;
+            user.RefreshToken = string.Empty;
+            user.Expires = null;
+            await dbService.UpdateAsync(user);
+
+            await discordLogManager.Log(
+                $"Failed to update token for <@{user.Id}> ({user.GetMarkdownOsuProfileLink()})! This user is now marked as not authorized.",
+                LogLevel.Error,
+                cancellationToken);
+
             return false;
         }
 
-        if (tokenResponse is null)
-        {
-            logger.LogError("Failed to get new tokens for user: {UserId}", discordId);
-            return false;
-        }
+        var tokenResponse = tokenResponseResult.Value;
 
         user.RefreshToken = tokenResponse.RefreshToken;
         user.AccessToken = tokenResponse.AccessToken;
-        user.Expires = DateTimeOffset.UtcNow.AddSeconds(tokenResponse.ExpiresIn);
+        user.Expires = currentTime.AddSeconds(tokenResponse.ExpiresIn);
         user.Authorized = true;
 
         var result = await dbService.UpdateAsync(user);
@@ -207,7 +217,7 @@ public class UserManager(
         }
         catch (Exception e)
         {
-            logger.LogError("Failed to get guild user: {Message}", e.Message);
+            logger.LogError(e, "Failed to get guild user: {Message}", e.Message);
             return null;
         }
     }
