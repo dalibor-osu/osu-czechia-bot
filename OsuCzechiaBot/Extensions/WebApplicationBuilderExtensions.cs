@@ -56,6 +56,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddHostedService<TokenRefreshJob>();
         builder.Services.AddHostedService<OneTimeJobRunner>();
         builder.Services.AddOneTimeJob<AssignCountryRolesJob>();
+        builder.Services.AddOneTimeJob<MessageNonAuthorizedVerifiedUsersJob>();
 
         return builder;
     }

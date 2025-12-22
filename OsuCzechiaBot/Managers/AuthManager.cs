@@ -18,7 +18,7 @@ public class AuthManager(
 {
     public async Task<string> AuthorizeUserAsync(ulong discordId, string code, CancellationToken cancellationToken = default)
     {
-        var existingUser = await authorizedUserDatabaseService.GetByDiscordIdAsync(discordId);
+        var existingUser = await authorizedUserDatabaseService.GetAsync(discordId);
         if (existingUser != null)
         {
             return HtmlResponses.AuthAlreadyAuthorized;

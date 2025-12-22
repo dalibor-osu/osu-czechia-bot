@@ -27,7 +27,7 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
             return;
         }
 
-        var existingUser = await userManager.GetGuildUserAsync(userId);
+        var existingUser = await userManager.GetGuildUserAsync(userId, true);
         if (existingUser is null)
         {
             await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties
@@ -49,7 +49,7 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
     public async Task UnlinkAsync()
     {
         ulong discordId = Context.User.Id;
-        var existingUser = await userManager.GetGuildUserAsync(discordId);
+        var existingUser = await userManager.GetGuildUserAsync(discordId, true);
         if (existingUser is null)
         {
             await Context.Interaction.SendResponseAsync(InteractionCallback.Message(new InteractionMessageProperties

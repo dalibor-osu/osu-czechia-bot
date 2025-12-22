@@ -11,11 +11,6 @@ public class AuthorizedUserDatabaseService(OsuCzechiaBotDatabaseContext dbContex
         return await DbSet.Where(u => u.Expires <= threshold && u.Authorized).Select(u => u.Id).ToListAsync();
     }
 
-    public async Task<AuthorizedUser?> GetByDiscordIdAsync(ulong discordId)
-    {
-        return await GetByAsync(u => u.Id == discordId);
-    }
-
     public async Task<AuthorizedUser?> GetByOsuId(int osuId)
     {
         return await GetByAsync(u => u.OsuId == osuId);

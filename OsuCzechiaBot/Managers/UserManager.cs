@@ -18,14 +18,14 @@ public class UserManager(
     AuthorizedUserDatabaseService dbService,
     DiscordLogManager discordLogManager)
 {
-    public async Task<AuthorizedUser?> GetAsync(ulong discordId) => await dbService.GetByDiscordIdAsync(discordId);
+    public async Task<AuthorizedUser?> GetAsync(ulong discordId) => await dbService.GetAsync(discordId);
 
-    public async Task MessageUserAsync(ulong discordId, string message, CancellationToken cancellationToken = default)
+    public async Task<bool> MessageUserAsync(ulong discordId, string message, CancellationToken cancellationToken = default)
     {
-        var guildUser = await GetGuildUserAsync(discordId, cancellationToken);
+        var guildUser = await GetGuildUserAsync(discordId, cancellationToken: cancellationToken);
         if (guildUser is null)
         {
-            return;
+            return false;
         }
 
         try
@@ -35,10 +35,12 @@ public class UserManager(
             {
                 Content = message
             }, cancellationToken: cancellationToken);
+            return true;
         }
         catch (Exception e)
         {
             logger.LogError(e, "Something went wrong when DMing user: {UserId}", discordId);
+            return false;
         }
     }
 
@@ -124,7 +126,7 @@ public class UserManager(
     public async Task TimeOutUserAsync(ulong discordId, TimeSpan duration, string? reason = null,
         CancellationToken cancellationToken = default)
     {
-        var guildUser = await GetGuildUserAsync(discordId, cancellationToken);
+        var guildUser = await GetGuildUserAsync(discordId, cancellationToken: cancellationToken);
         if (guildUser is null)
         {
             return;
@@ -142,7 +144,7 @@ public class UserManager(
 
     public async Task<bool> RefreshTokenAsync(ulong discordId, CancellationToken cancellationToken = default)
     {
-        var user = await dbService.GetByDiscordIdAsync(discordId);
+        var user = await dbService.GetAsync(discordId);
         if (user == null)
         {
             logger.LogError("Failed to get user data: {UserId}", discordId);
@@ -193,7 +195,7 @@ public class UserManager(
     public async Task<bool> RenameUserAsync(ulong discordId, string newName,
         CancellationToken cancellationToken = default)
     {
-        var user = await GetGuildUserAsync(discordId, cancellationToken);
+        var user = await GetGuildUserAsync(discordId, cancellationToken: cancellationToken);
         if (user is null)
         {
             return false;
@@ -212,24 +214,32 @@ public class UserManager(
         return true;
     }
 
-    public async Task<GuildUser?> GetGuildUserAsync(ulong discordId, CancellationToken cancellationToken = default)
+    public async Task<GuildUser?> GetGuildUserAsync(ulong discordId, bool deleteOnFail = false, CancellationToken cancellationToken = default)
     {
+        GuildUser? guildUser = null;
         try
         {
-            var guildUser = await restClient.GetGuildUserAsync(configurationAccessor.Discord.GuildId, discordId,
+            guildUser = await restClient.GetGuildUserAsync(configurationAccessor.Discord.GuildId, discordId,
                 cancellationToken: cancellationToken);
-            return guildUser;
         }
         catch (Exception e)
         {
             logger.LogError(e, "Failed to get guild user: {Message}", e.Message);
-            return null;
         }
+
+        if (guildUser is not null || !deleteOnFail)
+        {
+            return guildUser;
+        }
+        
+        logger.LogWarning("User {DiscordId} will be removed, because they were not found in the guild", discordId);
+        await dbService.RemoveAsync(discordId);
+        return null;
     }
 
     private async Task<bool> RemoveAllUserRankRoles(AuthorizedUser user, CancellationToken cancellationToken = default)
     {
-        var guildUser = await GetGuildUserAsync(user.Id, cancellationToken);
+        var guildUser = await GetGuildUserAsync(user.Id, cancellationToken: cancellationToken);
         if (guildUser is null)
         {
             return false;
