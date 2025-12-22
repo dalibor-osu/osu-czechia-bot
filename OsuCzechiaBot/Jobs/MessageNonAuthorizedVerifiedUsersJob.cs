@@ -32,6 +32,8 @@ public class MessageNonAuthorizedVerifiedUsersJob(
             {
                 failedUserIds.Add(guildUser.Id);
             }
+
+            await Task.Delay(2 * 1000, cancellationToken);
         }
 
         if (failedUserIds.Count == 0)
@@ -39,7 +41,7 @@ public class MessageNonAuthorizedVerifiedUsersJob(
             await discordLogManager.LogAsync("Finished messaging manually verified users.");
             return;
         }
-        
+
         string failedUsersString = string.Join("\n", failedUserIds.Select(id => $"<@{id}>"));
         await discordLogManager.LogAsync($"Finished messaging manually verified users. Failed messaging these users:\n\n{failedUsersString}");
     }
@@ -67,15 +69,15 @@ public class MessageNonAuthorizedVerifiedUsersJob(
             return false;
         }
     }
-    
-    private const string Message = 
+
+    private const string Message =
         """
-        Hi! This is an automated message. You recieved it because there is a mismatch between your verified status in osu! Czechia discord server and this bot.
-        
-        This is most likely caused by a moderator assigning you the "Verified" role manually, without you using the */authorize* command. As a result, the bot cannot access information about your osu! account, which breaks automatic role updates and may affect future features.
-        
-        To fix this, please run the */authorize* command. This will link your osu! profile to the bot and update your roles accordingly. If you do not complete this step, your verification status may be removed in the future. If you encounter any issues, feel free to contact <@241541462729162752>.
-        
+        Hi! This is an automated message from <@241541462729162752>. You recieved it because there is a mismatch between your verified status in osu! Czechia discord server and this bot.
+
+        This is most likely caused by a moderator assigning you the "Verified" role manually, without you using the */authorize* command. As a result, the bot cannot access information about your osu! account, which breaks automatic role updates and may affect future features. If you believe you used this command in the past, please let me know.
+
+        To fix this, please run the */authorize* command. This will link your osu! profile to the bot and update your roles accordingly. If you do not complete this step, your verification status may be removed in the future. If you encounter any issues, feel free to contact me.
+
         Thank you for your time. With love, Dalibor <3
         """;
 }
