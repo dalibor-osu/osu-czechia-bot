@@ -1,4 +1,5 @@
 using OsuCzechiaBot.Exceptions;
+
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
@@ -9,10 +10,12 @@ public class DiscordConfiguration
     public string Token { get; set; } = string.Empty;
     public string InviteLink { get; set; } = string.Empty;
     public ulong GuildId { get; set; }
+    public ulong BotId { get; set; }
     public ulong BotAdminUserId { get; set; }
     public ulong AuthChannelId { get; set; }
     public ulong LogChannelId { get; set; }
     public ulong AdminChannelId { get; set; }
+    public ulong RoleChannelId { get; set; }
     public ulong AuthorizedRoleId { get; set; }
     
     public ulong OneDigitRoleId { get; set; }
@@ -65,6 +68,11 @@ public class DiscordConfiguration
             throw new ConfigurationException("Discord GuildId is not configured");
         }
 
+        if (BotId == 0)
+        {
+            throw new ConfigurationException("Discord BotId is not configured");
+        }
+
         if (AuthChannelId == 0)
         {
             throw new ConfigurationException("Discord AuthChannelId is not configured");
@@ -75,6 +83,11 @@ public class DiscordConfiguration
             throw new ConfigurationException("Discord LogChannelId is not configured");
         }
 
+        if (RoleChannelId == 0)
+        {
+            throw new ConfigurationException("Discord RoleChannelId is not configured");
+        }
+        
         if (AuthorizedRoleId == 0)
         {
             throw new ConfigurationException("Discord AuthorizedRoleId is not configured");

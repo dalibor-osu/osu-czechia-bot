@@ -4,7 +4,6 @@ using OsuCzechiaBot.Clients;
 using OsuCzechiaBot.Configuration;
 using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Extensions;
-using OsuCzechiaBot.Helpers.Optionals;
 using OsuCzechiaBot.Models;
 using OsuCzechiaBot.Models.OsuApi;
 
@@ -156,7 +155,7 @@ public class UserManager(
         if (!tokenResponseResult.Success)
         {
             logger.LogError("Failed to get new tokens for user: {UserId} | {Message}", discordId, tokenResponseResult.Error.Message);
-            if (tokenResponseResult.Error.ErrorType != ErrorType.Forbidden && !(user.Expires <= currentTime))
+            if (user.Expires > currentTime)
             {
                 return false;
             }
@@ -214,7 +213,8 @@ public class UserManager(
         return true;
     }
 
-    public async Task<GuildUser?> GetGuildUserAsync(ulong discordId, bool deleteOnFail = false, CancellationToken cancellationToken = default)
+    public async Task<GuildUser?> GetGuildUserAsync(ulong discordId, bool deleteOnFail = false,
+        CancellationToken cancellationToken = default)
     {
         GuildUser? guildUser = null;
         try
@@ -231,10 +231,74 @@ public class UserManager(
         {
             return guildUser;
         }
-        
+
         logger.LogWarning("User {DiscordId} will be removed, because they were not found in the guild", discordId);
         await dbService.RemoveAsync(discordId);
         return null;
+    }
+
+    public async Task<IReadOnlyCollection<GuildUser>> GetAllGuildUsersAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return await restClient.GetGuildUsersAsync(configurationAccessor.Discord.GuildId).ToListAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to get all guild users");
+        }
+
+        return [];
+    }
+
+    public async Task AddRole(ulong discordId, ulong roleId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await restClient.AddGuildUserRoleAsync(configurationAccessor.Discord.GuildId, discordId, roleId,
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to add role to user");
+        }
+    }
+
+    public async Task RemoveRole(ulong discordId, ulong roleId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await restClient.RemoveGuildUserRoleAsync(configurationAccessor.Discord.GuildId, discordId, roleId,
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to remove role from user");
+        }
+    }
+
+    public async Task RemoveRoleFromAllUsers(ulong roleId, CancellationToken cancellationToken = default)
+    {
+        var users = await GetAllGuildUsersAsync(cancellationToken);
+        if (users.Count < 1)
+        {
+            return;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            foreach (var user in users)
+            {
+                await user.RemoveRoleAsync(roleId, cancellationToken: cancellationToken);
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                await Task.Delay(500, cancellationToken);
+            }
+        }, cancellationToken);
     }
 
     private async Task<bool> RemoveAllUserRankRoles(AuthorizedUser user, CancellationToken cancellationToken = default)

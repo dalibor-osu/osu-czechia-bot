@@ -34,6 +34,8 @@ public class TokenRefreshJob(IServiceProvider serviceProvider) : BackgroundServi
                 {
                     logger.LogError("Failed to refresh token for user: {UserId}", userId);
                 }
+
+                await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
             }
         
             logger.LogInformation("Updated {Count} user tokens", successCount);

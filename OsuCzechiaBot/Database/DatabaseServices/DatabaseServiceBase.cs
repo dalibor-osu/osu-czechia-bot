@@ -14,6 +14,11 @@ public abstract class DatabaseServiceBase<T, TId>(OsuCzechiaBotDatabaseContext d
     {
         return await DbSet.AnyAsync(e => e.Id.Equals(id));
     }
+
+    public virtual async Task<long> CountAsync()
+    {
+        return await DbSet.LongCountAsync();
+    }
     
     public async Task<T> AddAsync(T entity)
     {

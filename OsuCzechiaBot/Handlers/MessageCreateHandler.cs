@@ -15,11 +15,12 @@ public class MessageCreateHandler : IMessageCreateGatewayHandler
 
     private readonly ConcurrentDictionary<ulong, Queue<DateTimeOffset>> _userMessages = new();
     private readonly ConcurrentDictionary<ulong, object> _userLocks = new();
-    
+
     private readonly ConfigurationAccessor _configurationAccessor;
     private readonly IServiceProvider _serviceProvider;
 
-    public MessageCreateHandler(ConfigurationAccessor configurationAccessor, IServiceProvider serviceProvider, IHostApplicationLifetime applicationLifetime)
+    public MessageCreateHandler(ConfigurationAccessor configurationAccessor, IServiceProvider serviceProvider,
+        IHostApplicationLifetime applicationLifetime)
     {
         _configurationAccessor = configurationAccessor;
         _serviceProvider = serviceProvider;
@@ -84,7 +85,7 @@ public class MessageCreateHandler : IMessageCreateGatewayHandler
             {
                 break;
             }
-            
+
             _userLocks.Clear();
             _userMessages.Clear();
             await Task.Delay(TimeSpan.FromMinutes(5), cancellationToken);

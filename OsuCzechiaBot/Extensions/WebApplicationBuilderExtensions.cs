@@ -51,13 +51,17 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddScoped<UserManager>();
         builder.Services.AddScoped<AuthManager>();
         builder.Services.AddScoped<DiscordLogManager>();
+        builder.Services.AddScoped<ReactionRoleManager>();
 
         // Jobs
+        builder.Services.AddHostedService<StartupJob>();
         builder.Services.AddHostedService<TokenRefreshJob>();
         builder.Services.AddHostedService<OneTimeJobRunner>();
         builder.Services.AddOneTimeJob<AssignCountryRolesJob>();
         builder.Services.AddOneTimeJob<MessageNonAuthorizedVerifiedUsersJob>();
 
+        builder.Services.AddMemoryCache();
+        
         return builder;
     }
 
@@ -90,6 +94,7 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddScoped<AuthorizedUserDatabaseService>();
         builder.Services.AddScoped<OneTimeJobLogDatabaseService>();
+        builder.Services.AddScoped<ReactionRoleDatabaseService>();
 
         return builder;
     }

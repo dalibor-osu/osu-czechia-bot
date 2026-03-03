@@ -42,4 +42,10 @@ public static class BotMessages
             public const string Unlinked = "Your osu! profile has been unlinked. You will have to authorize again using the */authorize* command.";
         }
     }
+    
+    public const string RoleReactionMessage =
+        """
+        CZ: Klink na reakci pro roli 
+        EN: Click on reaction emoji to get role
+        """;
 }
