@@ -12,6 +12,8 @@ At the moment, there are 2 slash commands you can use once you join the server
 - `/unlink`
   - Used for unlinking osu! profile that was linked to your Discord account using the previous `/authorize` command
 
+There are few commands for moderators as well that are used to manage reaction roles.
+
 ## Contributing
 
 Contributions are welcomed, however, no setup or contribution guide exists, so you will have to setup everything yourself. You can use docker compose and appsettings example files to help you with that.
