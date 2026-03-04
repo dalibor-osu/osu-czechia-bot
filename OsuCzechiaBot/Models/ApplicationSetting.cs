@@ -6,6 +6,7 @@ namespace OsuCzechiaBot.Models;
 public class ApplicationSetting : IIdentifiable<string>
 {
     [Key]
+    [MaxLength(256)]
     public required string Id { get; set; }
     
     [MaxLength(1024)]

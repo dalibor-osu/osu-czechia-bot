@@ -23,6 +23,22 @@ namespace OsuCzechiaBot.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("OsuCzechiaBot.Models.ApplicationSetting", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApplicationSettings", "osu_czechia");
+                });
+
             modelBuilder.Entity("OsuCzechiaBot.Models.AuthorizedUser", b =>
                 {
                     b.Property<decimal>("Id")
@@ -79,19 +95,29 @@ namespace OsuCzechiaBot.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<decimal>("EmojiId")
+                    b.Property<string>("Description")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<decimal?>("EmojiId")
                         .HasColumnType("numeric(20,0)");
 
                     b.Property<string>("EmojiName")
-                        .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
                     b.Property<bool>("IsAnimated")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsUnicode")
+                        .HasColumnType("boolean");
+
                     b.Property<decimal>("RoleId")
                         .HasColumnType("numeric(20,0)");
+
+                    b.Property<string>("UnicodeValue")
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
 
                     b.HasKey("Id");
 

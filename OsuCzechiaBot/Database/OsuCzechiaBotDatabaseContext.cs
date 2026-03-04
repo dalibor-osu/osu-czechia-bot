@@ -10,6 +10,7 @@ public class OsuCzechiaBotDatabaseContext(DbContextOptions<OsuCzechiaBotDatabase
     public DbSet<AuthorizedUser> AuthorizedUsers { get; set; }
     public DbSet<OneTimeJobLog> OneTimeJobLogs { get; set; }
     public DbSet<ReactionRole> ReactionRoles { get; set; }
+    public DbSet<ApplicationSetting> ApplicationSettings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -12,6 +12,19 @@ namespace OsuCzechiaBot.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "ApplicationSettings",
+                schema: "osu_czechia",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    Value = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApplicationSettings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ReactionRoles",
                 schema: "osu_czechia",
                 columns: table => new
@@ -19,9 +32,12 @@ namespace OsuCzechiaBot.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     RoleId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    EmojiName = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    EmojiId = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    IsAnimated = table.Column<bool>(type: "boolean", nullable: false)
+                    EmojiName = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    EmojiId = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
+                    IsAnimated = table.Column<bool>(type: "boolean", nullable: false),
+                    IsUnicode = table.Column<bool>(type: "boolean", nullable: false),
+                    UnicodeValue = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: true),
+                    Description = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -39,6 +55,10 @@ namespace OsuCzechiaBot.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ApplicationSettings",
+                schema: "osu_czechia");
+
             migrationBuilder.DropTable(
                 name: "ReactionRoles",
                 schema: "osu_czechia");

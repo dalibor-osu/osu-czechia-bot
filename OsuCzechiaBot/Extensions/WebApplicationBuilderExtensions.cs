@@ -95,6 +95,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddScoped<AuthorizedUserDatabaseService>();
         builder.Services.AddScoped<OneTimeJobLogDatabaseService>();
         builder.Services.AddScoped<ReactionRoleDatabaseService>();
+        builder.Services.AddScoped<ApplicationSettingDatabaseService>();
 
         return builder;
     }
