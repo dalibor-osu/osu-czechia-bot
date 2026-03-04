@@ -18,7 +18,7 @@ public class TokenRefreshJob(IServiceProvider serviceProvider) : BackgroundServi
             var dbService = provider.GetRequiredService<AuthorizedUserDatabaseService>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
             var logger = provider.GetRequiredService<ILogger<TokenRefreshJob>>();
-        
+
             logger.LogInformation("Starting token refresh job");
             var userIds = await dbService.ListExpiringIdsAsync();
             int successCount = 0;
@@ -37,7 +37,7 @@ public class TokenRefreshJob(IServiceProvider serviceProvider) : BackgroundServi
 
                 await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
             }
-        
+
             logger.LogInformation("Updated {Count} user tokens", successCount);
             await scope.DisposeAsync();
             await Task.Delay(nextStartTime - currentTime, stoppingToken);

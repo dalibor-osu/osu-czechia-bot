@@ -13,8 +13,5 @@ public class StartupJob(IServiceProvider serviceProvider) : BackgroundService
         await InitializeRoleMessageInfo(reactionRoleManager);
     }
 
-    private static async Task InitializeRoleMessageInfo(ReactionRoleManager reactionRoleManager)
-    {
-        await reactionRoleManager.UpdateRoleMessageAsync();
-    }
+    private static async Task InitializeRoleMessageInfo(ReactionRoleManager reactionRoleManager) => await reactionRoleManager.UpdateRoleMessageAsync();
 }

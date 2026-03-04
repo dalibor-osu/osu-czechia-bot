@@ -74,8 +74,5 @@ public class AuthModule(ConfigurationAccessor configurationAccessor, UserManager
         });
     }
 
-    private string GetAuthUrl(ulong userId)
-    {
-        return $"https://osu.ppy.sh/oauth/authorize?client_id={configurationAccessor.Osu.ClientId}&response_type=code&scope=identify&state={userId}";
-    }
+    private string GetAuthUrl(ulong userId) => $"https://osu.ppy.sh/oauth/authorize?client_id={configurationAccessor.Osu.ClientId}&response_type=code&scope=identify&state={userId}";
 }

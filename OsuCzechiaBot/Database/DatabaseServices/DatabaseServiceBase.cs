@@ -7,19 +7,13 @@ namespace OsuCzechiaBot.Database.DatabaseServices;
 
 public abstract class DatabaseServiceBase<T, TId>(OsuCzechiaBotDatabaseContext dbContext, DbSet<T> dbSet) where T : class, IIdentifiable<TId> where TId : IEquatable<TId>
 {
-    protected readonly DbSet<T> DbSet = dbSet;
-    protected readonly OsuCzechiaBotDatabaseContext Context = dbContext;
+    protected DbSet<T> DbSet { get; } = dbSet;
+    protected OsuCzechiaBotDatabaseContext Context { get; } = dbContext;
 
-    public virtual async Task<bool> ExistsAsync(TId id)
-    {
-        return await DbSet.AnyAsync(e => e.Id.Equals(id));
-    }
+    public virtual async Task<bool> ExistsAsync(TId id) => await DbSet.AnyAsync(e => e.Id.Equals(id));
 
-    public virtual async Task<long> CountAsync()
-    {
-        return await DbSet.LongCountAsync();
-    }
-    
+    public virtual async Task<long> CountAsync() => await DbSet.LongCountAsync();
+
     public async Task<T> AddAsync(T entity)
     {
         DbSet.Add(entity);
@@ -49,32 +43,20 @@ public abstract class DatabaseServiceBase<T, TId>(OsuCzechiaBotDatabaseContext d
         {
             return null;
         }
-        
+
         var result = DbSet.Update(entity);
 
         await Context.SaveChangesAsync();
         return result.Entity;
     }
 
-    public virtual async Task<T?> GetAsync(TId id)
-    {
-        return await DbSet.FirstOrDefaultAsync(e => e.Id.Equals(id));
-    }
+    public virtual async Task<T?> GetAsync(TId id) => await DbSet.FirstOrDefaultAsync(e => e.Id.Equals(id));
 
-    public virtual async Task<T?> GetByAsync(Expression<Func<T,bool>> predicate)
-    {
-        return await DbSet.FirstOrDefaultAsync(predicate);
-    }
+    public virtual async Task<T?> GetByAsync(Expression<Func<T,bool>> predicate) => await DbSet.FirstOrDefaultAsync(predicate);
 
-    public virtual async Task<IReadOnlyList<T>> GetManyAsync(List<TId> idList)
-    {
-        return await DbSet.Where(e => idList.Contains(e.Id)).ToListAsync();
-    }
+    public virtual async Task<IReadOnlyList<T>> GetManyAsync(List<TId> idList) => await DbSet.Where(e => idList.Contains(e.Id)).ToListAsync();
 
-    public virtual async Task<IReadOnlyCollection<T>> ListAsync(int offset = 0, int limit = int.MaxValue)
-    {
-        return await DbSet.Skip(offset).Take(limit).ToListAsync();
-    }
+    public virtual async Task<IReadOnlyCollection<T>> ListAsync(int offset = 0, int limit = int.MaxValue) => await DbSet.Skip(offset).Take(limit).ToListAsync();
 
     public virtual async Task<T?> RemoveAsync(TId id)
     {

@@ -53,7 +53,7 @@ public static class EmojiHelper
 
         while (i < input.Length)
         {
-            if (!Rune.TryGetRuneAt(input, i, out Rune rune))
+            if (!Rune.TryGetRuneAt(input, i, out var rune))
             {
                 return false;
             }

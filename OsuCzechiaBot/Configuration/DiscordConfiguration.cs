@@ -17,7 +17,7 @@ public class DiscordConfiguration
     public ulong AdminChannelId { get; set; }
     public ulong RoleChannelId { get; set; }
     public ulong AuthorizedRoleId { get; set; }
-    
+
     public ulong OneDigitRoleId { get; set; }
     public ulong TwoDigitRoleId { get; set; }
     public ulong ThreeDigitRoleId { get; set; }
@@ -42,7 +42,7 @@ public class DiscordConfiguration
         NineDigitRoleId,
         TenDigitRoleId,
     ];
-    
+
     public ulong TopOneRoleId { get; set; }
     public ulong TopTenRoleId { get; set; }
     public ulong TopFiftyRoleId { get; set; }
@@ -87,7 +87,7 @@ public class DiscordConfiguration
         {
             throw new ConfigurationException("Discord RoleChannelId is not configured");
         }
-        
+
         if (AuthorizedRoleId == 0)
         {
             throw new ConfigurationException("Discord AuthorizedRoleId is not configured");

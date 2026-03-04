@@ -61,7 +61,7 @@ public static class WebApplicationBuilderExtensions
         builder.Services.AddOneTimeJob<MessageNonAuthorizedVerifiedUsersJob>();
 
         builder.Services.AddMemoryCache();
-        
+
         return builder;
     }
 

@@ -13,7 +13,7 @@ public sealed class UserRemoveHandler : IGuildUserRemoveGatewayHandler, IDisposa
     private readonly ConfigurationAccessor _configurationAccessor;
     private readonly AuthorizedUserDatabaseService _dbService;
     private readonly DiscordLogManager _discordLogManager;
-    
+
     public UserRemoveHandler(IServiceProvider serviceProvider)
     {
         _scope = serviceProvider.CreateAsyncScope();
@@ -39,13 +39,7 @@ public sealed class UserRemoveHandler : IGuildUserRemoveGatewayHandler, IDisposa
         await _discordLogManager.LogAsync(string.Format(BotMessages.Events.UserLeftAndUnlinked, arg.User.Id));
     }
 
-    public void Dispose()
-    {
-        _scope.Dispose();
-    }
+    public void Dispose() => _scope.Dispose();
 
-    public async ValueTask DisposeAsync()
-    {
-        await _scope.DisposeAsync();
-    }
+    public async ValueTask DisposeAsync() => await _scope.DisposeAsync();
 }

@@ -25,7 +25,7 @@ public class OneTimeJobRunner(IServiceProvider provider) : BackgroundService
             logger.LogInformation("No one time jobs to run.");
             return;
         }
-        
+
         var immediateJobs = toRunList.Where(j => j.RunAt is null).ToList();
         var delayedJobs = toRunList.Where(j => j.RunAt is not null).ToList();
 
@@ -46,13 +46,13 @@ public class OneTimeJobRunner(IServiceProvider provider) : BackgroundService
             await RunJobNow(oneTimeJob, dbService, stoppingToken);
             return;
         }
-        
+
         await Task.Delay(oneTimeJob.RunAt!.Value - currentTime, stoppingToken);
         if (stoppingToken.IsCancellationRequested)
         {
             return;
         }
-        
+
         await RunJobNow(oneTimeJob, dbService, stoppingToken);
     }
 

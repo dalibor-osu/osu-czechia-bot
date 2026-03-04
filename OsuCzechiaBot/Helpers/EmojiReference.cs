@@ -26,9 +26,8 @@ public class EmojiReference
         IsUnicode = false;
     }
 
-    public ReactionRole ToReactionRole(Role role)
-    {
-        return new ReactionRole
+    public ReactionRole ToReactionRole(Role role) =>
+        new()
         {
             RoleId = role.Id,
             EmojiId = Id,
@@ -37,7 +36,6 @@ public class EmojiReference
             IsUnicode = IsUnicode,
             UnicodeValue = UnicodeValue
         };
-    }
 
     public override string ToString()
     {

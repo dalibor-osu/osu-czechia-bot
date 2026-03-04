@@ -131,15 +131,11 @@ public class ReactionRoleManager(
             return;
         }
 
-        await message.ModifyAsync((options => options.WithContent(content)));
+        await message.ModifyAsync(options => options.WithContent(content));
         await EnsureCorrectReactionsAsync(message, reactionRoles);
     }
 
-    public string GetReactionRoleMessageLink()
-    {
-        return
-            $"https://discord.com/channels/{configurationAccessor.Discord.GuildId}/{configurationAccessor.Discord.RoleChannelId}/{cache.Get<ulong>(CacheKeys.RoleMessageId)}";
-    }
+    public string GetReactionRoleMessageLink() => $"https://discord.com/channels/{configurationAccessor.Discord.GuildId}/{configurationAccessor.Discord.RoleChannelId}/{cache.Get<ulong>(CacheKeys.RoleMessageId)}";
 
     public async Task<string> GetRoleMessageContent()
     {

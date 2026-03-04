@@ -131,7 +131,7 @@ public class UserManager(
             return;
         }
 
-        await guildUser.ModifyAsync((options => options.WithTimeOutUntil(DateTimeOffset.Now + duration)),
+        await guildUser.ModifyAsync(options => options.WithTimeOutUntil(DateTimeOffset.Now + duration),
             cancellationToken: cancellationToken);
         if (string.IsNullOrWhiteSpace(reason))
         {

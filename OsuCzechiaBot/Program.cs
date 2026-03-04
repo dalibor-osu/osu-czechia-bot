@@ -16,7 +16,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider
         .GetRequiredService<OsuCzechiaBotDatabaseContext>();
-    
+
     await dbContext.Database.MigrateAsync();
 }
 
@@ -46,7 +46,7 @@ app.MapGet("/authorize", async (
         Log.Error(e, "Something went wrong when authorizing user: {Message}", e.Message);
         await httpContext.Response.WriteAsync(HtmlResponses.AuthFailed);
     }
-    
+
     return Results.Empty;
 });
 

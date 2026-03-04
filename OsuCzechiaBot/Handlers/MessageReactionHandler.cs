@@ -44,18 +44,15 @@ public sealed class MessageReactionHandler : IMessageReactionAddGatewayHandler, 
         {
             return;
         }
-        
+
         var reactionRole = await _reactionRoleDatabaseService.GetByMessageReactionEmoji(arg.Emoji);
         if (reactionRole == null)
         {
             return;
         }
-        
+
         await _userManager.RemoveRole(arg.UserId, reactionRole.RoleId);
     }
 
-    public void Dispose()
-    {
-        _serviceScope.Dispose();
-    }
+    public void Dispose() => _serviceScope.Dispose();
 }

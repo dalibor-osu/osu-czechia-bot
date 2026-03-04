@@ -122,5 +122,5 @@ public class RulesetStatistics
     /// Grade counts.
     /// </summary>
     [JsonPropertyName("grade_counts")]
-    public GradeCounts GradeCounts { get; set; } = null!; 
+    public GradeCounts GradeCounts { get; set; } = null!;
 }

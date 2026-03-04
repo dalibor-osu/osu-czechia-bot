@@ -25,8 +25,5 @@ public sealed class RoleDeleteHandler : IRoleDeleteGatewayHandler, IDisposable
         }
     }
 
-    public void Dispose()
-    {
-        _scope.Dispose();
-    }
+    public void Dispose() => _scope.Dispose();
 }

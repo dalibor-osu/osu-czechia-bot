@@ -22,7 +22,7 @@ public record Optional<T>
         _value = default;
         Success = false;
     }
-    
+
     public static implicit operator Optional<T>(T value) => new (value);
     public static implicit operator Optional<T>(Error error) => new (error);
 }

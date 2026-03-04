@@ -8,7 +8,7 @@ public class ReactionRole : IIdentifiable<long>
 {
     [Key]
     public long Id { get; set; }
-    
+
     public required ulong RoleId { get; set; }
     [MaxLength(32)]
     public string? EmojiName { get; set; }
@@ -17,7 +17,7 @@ public class ReactionRole : IIdentifiable<long>
     public bool IsUnicode { get; set; }
     [MaxLength(8)]
     public string? UnicodeValue { get; set; }
-    
+
     [MaxLength(256)]
     public string? Description { get; set; }
 
@@ -29,7 +29,7 @@ public class ReactionRole : IIdentifiable<long>
         {
             return UnicodeValue!;
         }
-        
+
         string prefix = IsAnimated ? "<a" : "<";
         return $"{prefix}:{EmojiName}:{EmojiId}>";
     }
@@ -40,7 +40,7 @@ public class ReactionRole : IIdentifiable<long>
         {
             return new ReactionEmojiProperties($"{UnicodeValue}");
         }
-        
+
         return new ReactionEmojiProperties(EmojiName!, EmojiId!.Value);
     }
 }

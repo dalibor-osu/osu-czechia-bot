@@ -17,5 +17,5 @@ public class GradeCounts
     public int Sh { get; set; }
 
     [JsonPropertyName("a")]
-    public int A { get; set; } 
+    public int A { get; set; }
 }

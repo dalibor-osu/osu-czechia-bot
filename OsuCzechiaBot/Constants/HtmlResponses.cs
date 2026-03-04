@@ -40,7 +40,7 @@ public static class HtmlResponses
                                                     </body>
                                                 </html>
                                                 """;
-    
+
     private const string Head = $"""
                                 <head>
                                 <meta charset="UTF-8">
@@ -48,7 +48,7 @@ public static class HtmlResponses
                                 {SimpleCss}
                                 </head>
                                 """;
-    
+
     private const string SimpleCss = """
                                      <style>
                                        body {
@@ -60,7 +60,7 @@ public static class HtmlResponses
                                          max-width: 700px;
                                          margin: 0 auto;
                                        }
-                                     
+
                                        p {
                                          margin-bottom: 15px;
                                        }
