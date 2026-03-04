@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using NetCord.Gateway;
 using NetCord.Hosting.Gateway;
+using OsuCzechiaBot.Configuration;
 using OsuCzechiaBot.Constants;
 using OsuCzechiaBot.Database.DatabaseServices;
 using OsuCzechiaBot.Managers;
@@ -12,6 +13,7 @@ public sealed class MessageReactionHandler : IMessageReactionAddGatewayHandler, 
     private readonly IMemoryCache _memoryCache;
     private readonly ReactionRoleDatabaseService _reactionRoleDatabaseService;
     private readonly UserManager _userManager;
+    private readonly ConfigurationAccessor _configurationAccessor;
     private readonly IServiceScope _serviceScope;
 
     public MessageReactionHandler(IServiceProvider serviceProvider)
@@ -20,10 +22,16 @@ public sealed class MessageReactionHandler : IMessageReactionAddGatewayHandler, 
         _memoryCache = _serviceScope.ServiceProvider.GetRequiredService<IMemoryCache>();
         _reactionRoleDatabaseService = _serviceScope.ServiceProvider.GetRequiredService<ReactionRoleDatabaseService>();
         _userManager = _serviceScope.ServiceProvider.GetRequiredService<UserManager>();
+        _configurationAccessor = serviceProvider.GetRequiredService<ConfigurationAccessor>();
     }
 
     public async ValueTask HandleAsync(MessageReactionAddEventArgs arg)
     {
+        if (arg.UserId == _configurationAccessor.Discord.BotId || arg.User?.IsBot == true)
+        {
+            return;
+        }
+
         if (arg.MessageId != _memoryCache.Get<ulong>(CacheKeys.RoleMessageId))
         {
             return;
