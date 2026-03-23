@@ -9,10 +9,10 @@ public static class BotMessages
         public const string AuthTimeOut = "Too many messages in authorization channel. If you'd like to get help, contact anyone from the Mod team.";
 
         [StringSyntax("CompositeFormat")]
-        public const string UserLeft = "User <@{0}> left.";
+        public const string UserLeft = "User <@{0}> ({1}) left.";
 
         [StringSyntax("CompositeFormat")]
-        public const string UserLeftAndUnlinked = "User <@{0}> left. They were unlinked and removed from the database.";
+        public const string UserLeftAndUnlinked = "User <@{0}> ({1}) left. They were unlinked and removed from the database.";
     }
 
     public static class Commands

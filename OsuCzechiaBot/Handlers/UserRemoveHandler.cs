@@ -32,11 +32,11 @@ public sealed class UserRemoveHandler : IGuildUserRemoveGatewayHandler, IDisposa
         var removedUser = await _dbService.RemoveAsync(arg.User.Id);
         if (removedUser is null)
         {
-            await _discordLogManager.LogAsync(string.Format(BotMessages.Events.UserLeft, arg.User.Id));
+            await _discordLogManager.LogAsync(string.Format(BotMessages.Events.UserLeft, arg.User.Id, arg.User.Username));
             return;
         }
 
-        await _discordLogManager.LogAsync(string.Format(BotMessages.Events.UserLeftAndUnlinked, arg.User.Id));
+        await _discordLogManager.LogAsync(string.Format(BotMessages.Events.UserLeftAndUnlinked, arg.User.Id, arg.User.Username));
     }
 
     public void Dispose() => _scope.Dispose();
